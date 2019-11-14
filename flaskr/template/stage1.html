@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Project Amnesia Demo</title>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1 style="text-align: center">Project Amnesia Demo</h1>
+    <h2 style="text-align: left">User-Item Interaction Matrix</h2>
+    <table>
+        <tr>
+            <th>User </th>
+            {% for movie in history[0] %}
+                <th>Movie {{ loop.index0 }}</th>
+            {% endfor %}
+        </tr>
+        {% for user in history %}
+            <tr>
+                <th>User {{ loop.index0 }}</th>
+                {% for action in user %}
+                    <td>{{ action }}</td>
+                {% endfor %}
+        {% endfor %}
+ 
+    </table>        
+</div>
+{% endblock %}

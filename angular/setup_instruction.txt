@@ -1,0 +1,13 @@
+1. Install node.js
+2. Install angular cli
+$ npm install -g @angular/cli
+3. Check angular cli version
+$ ng --version
+4. Create the app named deml-app
+$ ng new deml-app
+5. Access the web app
+$ ng serve
+# this gives us live host, go to google type localhost :
+
+
+6. 

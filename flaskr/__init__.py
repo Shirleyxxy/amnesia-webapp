@@ -23,4 +23,9 @@ def create_app(test_config=None):
         data = [json.loads(line) for line in open(filename, 'r')]
         return data[0]['data']
 
+    # For jquery use if we want to have interactive table
+    @app.route('/interactive/')
+    def interactive():
+        return render_template('interactive.html')
+
     return app

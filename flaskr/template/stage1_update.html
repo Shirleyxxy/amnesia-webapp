@@ -25,7 +25,7 @@
     <section class="contents">
         <div class="matrices">
             <table id='history_matrix'>
-                <caption>History Matrix</caption>
+                <caption>Updated History Matrix</caption>
                 <tr>
                     <th>User </th>
                     {% for movie in item_inter %}
@@ -33,16 +33,18 @@
                     {% endfor %}
                 </tr>
                 {% for user in history %}
-                    <tr>
-                        <th>User {{ loop.index0 }}</th>
-                        {% for action in user %}
-                            <td>{{ action }}</td>
-                        {% endfor %}
-                    </tr>
+                    {% if matrix_update[loop.index0] == 1 %}
+                        <tr>
+                            <th>User {{ loop.index0 }}</th>
+                            {% for action in user %}
+                                <td>{{ action }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endif %}
                 {% endfor %}
             </table>
             <table id='interaction_matrix'>
-                <caption>Interaction Matrix</caption>
+                <caption>Updated Interaction Matrix</caption>
                 <tr>
                     {% for movie in item_inter %}
                         <th>Movie {{ loop.index0 }}</th>
@@ -58,7 +60,7 @@
         
         <div class="matrix">
             <table id="cooc_matrix">
-                <caption>Cooccurrence Matrix</caption>
+                <caption>Updated Cooccurrence Matrix</caption>
                 <tr>
                     <th>Items</th>
                     {% for movie in item_inter %}
@@ -78,7 +80,7 @@
         </div>
         <div class="matrix">
             <table id='similarity_matrix'>
-                <caption>Similarity Matrix</caption>
+                <caption>Updated Similarity Matrix</caption>
                 <tr>
                     <th>Items</th>
                     {% for movie in item_inter %}
@@ -101,13 +103,11 @@
     <section class="buttons">
         <!-- <input type = "button" onclick = "update()" value = "Say Hello" /> -->
         <form method="post">
-            <button id='update_button' type="submit">Forget!</button>
+            <button id="update_button" type="submit">Return!</button>
         </form>
     </section>
 
     <footer id="address">
         60 5th Ave, New York, NY, 10011 • Center for Data Science, New York University        
     </footer>
-
- 
 {% endblock %}

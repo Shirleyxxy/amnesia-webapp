@@ -25,18 +25,31 @@ filename = sys.argv[-1]
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    json_data = read_json(filename)
-    history = read_history(json_data, 0)
-    item_inter = read_item_iteraction(json_data, 0)
-    cooc = read_cooccurences(json_data, 0)
-    simi = read_similarity_matrix(json_data, 0)
+
+    json_data, history, item_inter, cooc, simi = read_all(filename, timestamp=0)
+    if request.method == 'POST':
+        # do stuff when the form is submitted
+        return redirect(url_for('update'))
 
     return render_template('stage1.html', history= history, 
                                           item_inter = item_inter,
                                           cooc = cooc,
                                           simi = simi)
+    
+    
+@app.route('/update', methods= ['GET', 'POST'])
+def update():
+    if request.method == 'POST':
+        return redirect(url_for('index'))
+    json_data, history, item_inter, cooc, simi = read_all(filename, timestamp=0)
+
+    updated_hist, matrix_update, updated_item, updated_cooc, updated_simi = update_all(json_data, history, item_inter, cooc, simi, 1)
+    return render_template('stage1_update.html', history= updated_hist, 
+                                          item_inter = updated_item,
+                                          cooc = updated_cooc,
+                                          simi = updated_simi)
 
 if __name__ == "__main__":
     app.run(debug = True)

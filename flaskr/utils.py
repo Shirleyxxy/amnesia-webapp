@@ -1,6 +1,8 @@
 import numpy as np 
+import pandas as pd
 import json
 from fractions import Fraction
+import copy
 
 def read_json(filename):
     json_data = [json.loads(line) for line in open(filename, 'r')]
@@ -73,5 +75,56 @@ def read_similarity_matrix(json_data,timestamp):
     return simi
 
 
+def read_update(json_data):
+    return [x for x in json_data if x['change'] == -1]
 
+def read_update_result(json_data):
+    return [x for x in json_data if x['change'] == 1]
 
+def history_update(history_matrix, json_data, timestamp=1):
+    """
+    This method makes a deep copy hence the original history_matrix will not be changed
+    """
+    updated_hist = copy.deepcopy(history_matrix)
+    changes = read_update(read_action(read_time(json_data, timestamp), 'interactions'))
+    for change in changes:
+        updated_hist[change['user']][change['item']] += change['change']
+    
+    matrix_update = [0 if all(i==0 for i in x ) else 1 for x in updated_hist]
+    return updated_hist, matrix_update
+
+def item_inter_update(item_inter, json_data, timestamp=1):
+    changes = read_update_result(read_action(read_time(json_data, timestamp), 'item_interactions_n'))
+    for change in changes:
+        item_inter[change['item']] = change['change']
+    return item_inter
+
+def cooc_update(cooc, json_data, timestamp=1):
+    changes = read_update_result(read_action(read_time(json_data, timestamp), 'cooccurrences_c'))
+    for change in changes:
+        cooc[change['item_a']][change['item_b']] = change['change']
+        cooc[change['item_b']][change['item_a']] = change['change']
+    return cooc
+
+def simi_update(simi, json_data, timestamp=1):
+    changes = read_update_result(read_action(read_time(json_data, timestamp), 'similarities_s'))
+    for change in changes:
+        simi[change['item_a']][change['item_b']] = str(Fraction(change['similarity']).limit_denominator())
+        simi[change['item_b']][change['item_a']] = str(Fraction(change['similarity']).limit_denominator())
+    return simi
+
+def read_all(filename, timestamp=0):
+    json_data = read_json(filename)
+    history = read_history(json_data, timestamp)
+    item_inter = read_item_iteraction(json_data, timestamp)
+    cooc = read_cooccurences(json_data, timestamp)
+    simi = read_similarity_matrix(json_data, timestamp)
+    return json_data, history, item_inter, cooc, simi
+
+def update_all(json_data,history_matrix, item_inter, cooc, simi,  timestamp=1):
+    updated_hist, matrix_update = history_update(history_matrix, json_data, timestamp)
+    updated_item = item_inter_update(item_inter, json_data, timestamp)
+    updated_cooc = cooc_update(cooc, json_data, timestamp)
+    updated_simi = simi_update(simi, json_data, timestamp)
+
+    return updated_hist, matrix_update, updated_item, updated_cooc, updated_simi

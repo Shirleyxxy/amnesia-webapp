@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def render_static():
-    return render_template('hello_test.html')
+    return render_template('json_to_html_table.html')
 
 if __name__ == '__main__':
     app.run()

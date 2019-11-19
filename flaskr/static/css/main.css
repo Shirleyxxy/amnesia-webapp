@@ -1,4 +1,132 @@
-body, html {
+body{
+    background-color: rgb(58,58,58);
+    color: white;
+    font-family: Helvetica Neue, Helvetica, Arial, Helvetica, sans-serif;
+    margin: 0px;
+    padding:0px;
+}
+
+
+header{
+    background-color: lightslategrey;
+    height: 50px;
+    padding: 20px;
+    text-align: center;
+}
+
+header a{
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    text-transform: uppercase;
+    margin-top: 80px;
+}
+a:hover{
+    text-decoration: underline;
+}
+
+#title {
+    font-size: 42px;
+    color: brown
+}
+
+nav ul{
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+nav li{
+    display: inline-block;
+    margin-right: 20px;
+
+}
+
+a:hover{
+    text-decoration: underline;
+}
+
+
+.contents{
+    background-color: burlywood;
+    margin: 0;
+    padding: 10px;
+    height: 350px;
+    display: flex;
+    flex-direction: row;
+}
+
+
+
+.matrix{
+
+    background: beige;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30%;
+    height: 100%;
+
+}
+table {
+    width: 80%;
+    height: 80%;
+    margin: 0 auto;
+    color: black;
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+#history_matrix{
+    width: 60%;
+    height: 60%;
+}
+#interaction_matrix{
+    width:40%;
+    height: 20%;
+
+}
+.matrices{
+    background: beige;
+    margin: auto;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 30%;
+    height: 100%;
+}
+
+
+
+td, th {
+    border: 1px solid black;
+}
+
+
+
+th {
+    color: black;
+    font-size: 12px;
+    height: 30px;
+}
+
+td {
+    color: black;
+    text-align: center;
+    padding: 5px;
+}
+
+
+
+footer{
+    background: brown;
+    color: grey;
+    padding: 10px 10px;
+    font-size: 12px;
+}
+
+/* body, html {
     margin: 0;
     font-family: sans-serif;
 }
@@ -32,4 +160,4 @@ td {
 
 #content {
     width: 70%;
-}
+} */

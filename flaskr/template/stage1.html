@@ -1,28 +1,106 @@
 {% extends 'base.html' %}
 
-{% block head %}
-<title>Project Amnesia Demo</title>
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 {% endblock %}
 
+
+{% block head %}
+    <title>Project Amnesia Demo</title>
+{% endblock %}
+
+
 {% block body %}
-<div class="content">
-    <h1 style="text-align: center">Project Amnesia Demo</h1>
-    <h2 style="text-align: left">User-Item Interaction Matrix</h2>
-    <table>
-        <tr>
-            <th>User </th>
-            {% for movie in history[0] %}
-                <th>Movie {{ loop.index0 }}</th>
-            {% endfor %}
-        </tr>
-        {% for user in history %}
-            <tr>
-                <th>User {{ loop.index0 }}</th>
-                {% for action in user %}
-                    <td>{{ action }}</td>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="https://ssc.io/">Home</a></li>
+                <li><a href="https://github.com/schelterlabs/projects-amnesia">Github</a></li>
+                <li id='title'>Project Amnesia Demo</li>
+                <li><a href="https://drive.google.com/file/d/1FU4svEaLb6a5v8CI4tl4YQpv4Cr4DUei/view">Slides</a></li>
+                <li><a href="https://drive.google.com/file/d/17M6k_b94stLyPB6LHOq9td2pRDAmREr8/view">Paper</a></li>
+        </nav>
+    </header>
+    <section class="contents">
+        <div class="matrices">
+            <table id='history_matrix'>
+                <caption>History Matrix</caption>
+                <tr>
+                    <th>User </th>
+                    {% for movie in item_inter %}
+                        <th>Movie {{ loop.index0 }}</th>
+                    {% endfor %}
+                </tr>
+                {% for user in history %}
+                    <tr>
+                        <th>User {{ loop.index0 }}</th>
+                        {% for action in user %}
+                            <td>{{ action }}</td>
+                        {% endfor %}
+                    </tr>
                 {% endfor %}
-        {% endfor %}
- 
-    </table>        
-</div>
+            </table>
+            <table id='interaction_matrix'>
+                <caption>Interaction Matrix</caption>
+                <tr>
+                    {% for movie in item_inter %}
+                        <th>Movie {{ loop.index0 }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for interaction in item_inter %}
+                        <td>{{ interaction }}</td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </div>
+        
+        <div class="matrix">
+            <table id="cooc_matrix">
+                <caption>Cooccurrence Matrix</caption>
+                <tr>
+                    <th>Items</th>
+                    {% for movie in item_inter %}
+                        <th>Movie {{ loop.index0 }}</th>
+                    {% endfor %}
+                </tr>
+                {% for movie in cooc %}
+                <tr>
+                    <th>Movie {{ loop.index0 }}</th>
+                    {% for interaction in movie %}
+                        <td>{{ interaction }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                
+            </table>
+        </div>
+        <div class="matrix">
+            <table id='similarity_matrix'>
+                <caption>Similarity Matrix</caption>
+                <tr>
+                    <th>Items</th>
+                    {% for movie in item_inter %}
+                        <th>Movie {{ loop.index0 }}</th>
+                    {% endfor %}
+                </tr>
+                {% for movie in simi %}
+                <tr>
+                    <th>Movie {{ loop.index0 }}</th>
+                    {% for similarity in movie %}
+                        <td>{{ similarity }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+
+
+
+    </section>
+    <footer>
+        60 5th Ave, New York, NY, 10011 • Center for Data Science, New York University        
+    </footer>
 {% endblock %}

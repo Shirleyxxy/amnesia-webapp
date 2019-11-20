@@ -96,14 +96,14 @@ def history_update(history_matrix, json_data, timestamp=1):
 def item_inter_update(item_inter, json_data, timestamp=1):
     changes = read_update_result(read_action(read_time(json_data, timestamp), 'item_interactions_n'))
     for change in changes:
-        item_inter[change['item']] = change['change']
+        item_inter[change['item']] = change['count']
     return item_inter
 
 def cooc_update(cooc, json_data, timestamp=1):
     changes = read_update_result(read_action(read_time(json_data, timestamp), 'cooccurrences_c'))
     for change in changes:
-        cooc[change['item_a']][change['item_b']] = change['change']
-        cooc[change['item_b']][change['item_a']] = change['change']
+        cooc[change['item_a']][change['item_b']] = change['num_cooccurrences']
+        cooc[change['item_b']][change['item_a']] = change['num_cooccurrences']
     return cooc
 
 def simi_update(simi, json_data, timestamp=1):

@@ -9,7 +9,7 @@ Setup:
 3. cmd+click the local host address.
 4. (optional) Hit shift+command+r (chrome) if css not loading new changes!(cache problem for chrome)
 """
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 #from flask_sqlalchemy import SQLAlchemy
 import sys
 from utils import *
@@ -23,7 +23,7 @@ from utils import *
 
 filename = sys.argv[-1]
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='template')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -33,7 +33,7 @@ def index():
         # do stuff when the form is submitted
         return redirect(url_for('update'))
 
-    return render_template('stage1.html', history= history, 
+    return render_template('/stage1.html', history= history, 
                                           item_inter = item_inter,
                                           cooc = cooc,
                                           simi = simi)
@@ -46,10 +46,10 @@ def update():
     json_data, history, item_inter, cooc, simi = read_all(filename, timestamp=0)
 
     updated_hist, matrix_update, updated_item, updated_cooc, updated_simi = update_all(json_data, history, item_inter, cooc, simi, 1)
-    return render_template('stage1_update.html', history= updated_hist, 
+    return render_template('/stage1_update.html', history= updated_hist, 
                                           item_inter = updated_item,
                                           cooc = updated_cooc,
-                                          simi = updated_simi)
-
+                                          simi = updated_simi, 
+                                          matrix_update= matrix_update)
 if __name__ == "__main__":
     app.run(debug = True)

@@ -110,8 +110,15 @@
         var data = text.split('\n');
         for (i = 0; i < data.length; i++)
         {
+            try
+            {
             var dataItem = JSON.parse(data[i]);
             appendValidObject(dataItem)
+            }
+            catch
+            {
+                alert(data[i]);
+            }
         }
     });
 

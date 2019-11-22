@@ -29,9 +29,48 @@ table, th, td {
         click here 
     </button> 
 
-    <div id="divInteractions">
 
-    </div>
+    <table>
+        <tr>
+            <td>
+                <fieldset>
+                <h1>Interactions</h1>   
+                <div id="divInteractions">
+
+                </div>
+            </fieldset>
+            </td>
+            <td>
+                    <div id="divCooccurrences">
+                            <!--placeholder for cooccurrences_c matrix-->
+               <!--remove the label once you write the function-->
+               <p>placeholder for cooccurrences matrix</p>
+                       </div>
+            </td>
+            <td>
+                    <div id="divSimilarities">
+                            <!--placeholder for similarities_s matrix-->  
+                            <!--remove the label once you write the function-->
+                 <p>placeholder for similarity matrix</p>
+                         </div>
+            </td>
+        </tr>
+        <tr>
+            <tr>
+                <td colspan="3">
+                        <div id="divItemInteractionsN">
+                                <!--placeholder for item_interactions_n matrix-->
+                                <!--remove the label once you write the function-->
+                                <p>placeholder for item_interactions_n matrix</p>
+                            </div>
+                </td>
+            </tr>
+        </tr>
+
+    </table>       
+
+
+        
       
     <br><br> 
       
@@ -114,8 +153,9 @@ table, th, td {
 
     }
 
-    //usage:
-    readTextFile("../static/sample-output.json", function(text){
+    $( document ).ready(function() {
+       
+        readTextFile("../static/sample-output.json", function(text){
         var data = text.split('\n');
         for (i = 0; i < data.length; i++)
         {
@@ -127,6 +167,8 @@ table, th, td {
                 {
                 var dataItem = JSON.parse(data[i]);
                 appendValidObject(dataItem)
+
+               
                 }
             }
             catch
@@ -134,7 +176,15 @@ table, th, td {
                 alert(data[i]);
             }
         }
+         //loads all the matrix on page load
+        loadAllMatrix();
     });
+
+    
+    
+});
+    //usage:
+    
 
     function giveDistinctValues(items, attribute)
     {
@@ -160,8 +210,9 @@ table, th, td {
         return false;
     }
 
-    $(function() {	
-    $("#addInteractions").click(function() {
+   
+    function loadInteractionsMatix()
+    {
         var interactionObject = time_0['interactions'];
         distinctUsers = giveDistinctValues(interactionObject, "user");
         distinctItems = giveDistinctValues(interactionObject, "item"); 
@@ -183,10 +234,31 @@ table, th, td {
                 }
             }
             $('#divInteractions').append(table);
-       
-    });
-});
+        
+    }
 
+    function loadSimilarityMatrix()
+    {
+        //todo
+    }
+
+    function loadCoccurrenceMatrix()
+    {
+        //todo
+    }
+
+    function loadItemInteractionMatrix()
+    {
+        //todo
+    }
+
+    function loadAllMatrix()
+    {
+        loadInteractionsMatix();
+        loadSimilarityMatrix();
+        loadCoccurrenceMatrix();
+        loadItemInteractionMatrix();
+    }
 
     </script>  
 </body>   

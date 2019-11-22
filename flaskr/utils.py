@@ -1,5 +1,4 @@
 import numpy as np 
-import pandas as pd
 import json
 from fractions import Fraction
 import copy
@@ -94,24 +93,27 @@ def history_update(history_matrix, json_data, timestamp=1):
     return updated_hist, matrix_update
 
 def item_inter_update(item_inter, json_data, timestamp=1):
+    updated_inter = copy.deepcopy(item_inter)
     changes = read_update_result(read_action(read_time(json_data, timestamp), 'item_interactions_n'))
     for change in changes:
-        item_inter[change['item']] = change['count']
-    return item_inter
+        updated_inter[change['item']] = change['count']
+    return updated_inter
 
 def cooc_update(cooc, json_data, timestamp=1):
+    updated_cooc = copy.deepcopy(cooc)
     changes = read_update_result(read_action(read_time(json_data, timestamp), 'cooccurrences_c'))
     for change in changes:
-        cooc[change['item_a']][change['item_b']] = change['num_cooccurrences']
-        cooc[change['item_b']][change['item_a']] = change['num_cooccurrences']
-    return cooc
+        updated_cooc[change['item_a']][change['item_b']] = change['num_cooccurrences']
+        updated_cooc[change['item_b']][change['item_a']] = change['num_cooccurrences']
+    return updated_cooc
 
 def simi_update(simi, json_data, timestamp=1):
+    updated_simi = copy.deepcopy(simi)
     changes = read_update_result(read_action(read_time(json_data, timestamp), 'similarities_s'))
     for change in changes:
-        simi[change['item_a']][change['item_b']] = str(Fraction(change['similarity']).limit_denominator())
-        simi[change['item_b']][change['item_a']] = str(Fraction(change['similarity']).limit_denominator())
-    return simi
+        updated_simi[change['item_a']][change['item_b']] = str(Fraction(change['similarity']).limit_denominator())
+        updated_simi[change['item_b']][change['item_a']] = str(Fraction(change['similarity']).limit_denominator())
+    return updated_simi
 
 def read_all(filename, timestamp=0):
     json_data = read_json(filename)
@@ -128,3 +130,72 @@ def update_all(json_data,history_matrix, item_inter, cooc, simi,  timestamp=1):
     updated_simi = simi_update(simi, json_data, timestamp)
 
     return updated_hist, matrix_update, updated_item, updated_cooc, updated_simi
+"""
+The following functions read in the differences between before and after matrices. 
+Not used right now but kept for future use if needed.
+"""
+def hist_change(json_data, timestamp=1):
+    """
+    Output in a dict of changed users
+    Key is the user, the value is a list of tuples (item, changed_value)
+    TODO: Change now only -1, may need more general case
+    """
+    changes = read_update(read_action(read_time(json_data, timestamp), 'interactions'))
+    users = set([x['user'] for x in changes])
+
+    result = {}
+    
+    for user in users:
+        result[user] = [(x['item'], x['change']) for x in changes if x['user'] == user]
+
+    return result
+
+def item_change(json_data, timestamp):
+    """
+    Assume change is only once
+    """
+    changed_result = read_update_result(read_action(read_time(json_data, timestamp), 'item_interactions_n'))
+    result = {x['item']:x['count'] for x in changed_result}
+    return result
+
+def cooc_change(json_data, timestamp):
+    """
+    Output a dict with key as item_a, value as item_b and change_to_value
+    """
+    changed_result = read_update_result(read_action(read_time(json_data, timestamp), 'cooccurrences_c'))
+    item_as = set(x['item_a'] for x in changed_result)
+    result = {}
+    for a in item_as:
+        result[a] = [(x['item_b'], x['num_cooccurrences']) for x in changed_result if x['item_a'] == a]
+    return result
+
+def simi_change(json_data, timestamp=1):
+    changed_result = read_update_result(read_action(read_time(json_data, timestamp), 'similarities_s'))
+    item_as = set(x['item_a'] for x in changed_result)
+    result = {}
+    for a in item_as:
+        result[a] = [(x['item_b'], 
+                     str(Fraction(x['similarity']).limit_denominator())) for x in changed_result if x['item_a'] == a]
+    return result
+
+def read_diff(json_data , history_matrix, timestamp=1):
+    # hist update records which row will be deleted
+    _, row_update = history_update(history_matrix, json_data, timestamp)
+    # TODO: Generalize
+    # desired  = hist_update.index(0)+1
+
+    # Only hist record changed values
+    hist_diff = hist_change(json_data, timestamp)
+    # Only itet change value is not list
+    item_diff = item_change(json_data, timestamp)
+    # cooc and simi need to do additional transpose
+    cooc_diff = cooc_change(json_data, timestamp)
+    simi_diff = simi_change(json_data, timestamp)
+    return row_update, hist_diff, item_diff, cooc_diff, simi_diff
+
+
+
+
+    
+
+

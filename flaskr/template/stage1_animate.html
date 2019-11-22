@@ -1,0 +1,192 @@
+{% extends 'base_animate.html' %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main_animate.css') }}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+
+{% endblock %}
+
+
+{% block head %}
+    <title>Project Amnesia Demo</title>
+{% endblock %}
+
+
+{% block body %}
+
+<header>
+    <nav>
+        <ul>
+            <li><a href="https://ssc.io/">Home</a></li>
+            <li><a href="https://github.com/schelterlabs/projects-amnesia">Github</a></li>
+            <li id='title'>Project Amnesia Demo</li>
+            <li><a href="https://drive.google.com/file/d/1FU4svEaLb6a5v8CI4tl4YQpv4Cr4DUei/view">Slides</a></li>
+            <li><a href="https://drive.google.com/file/d/17M6k_b94stLyPB6LHOq9td2pRDAmREr8/view">Paper</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="buttons">
+        <button id="toggle">Forget!</button>
+        <button id="remember">Remember!</button>
+        <script>
+            $('#title').click(function(){
+                location.reload();
+            });
+            $("#toggle").on('click', function() {
+
+                $('tr.history:nth-child({{desired}})').fadeToggle(1000, function(){
+                    $('.history-update').delay(500).show().animate({opacity: '1'},1000);
+                    $('.history-update').delay(500).fadeOut(1000);
+
+                });
+
+                $('tr.inter td div.before').delay(4000).fadeToggle(1000, function(){
+                    $('tr.inter td div.after').delay(500).show().animate({opacity:'1'}, 1000);
+
+                });
+
+                $('tr.cooc td div.before').delay(6000).fadeToggle(1000, function(){
+                    $('tr.cooc td div.after').delay(500).show().animate({opacity: '1'}, 1000);
+
+                });
+                $('tr.simi td div.before').delay(9000).fadeToggle(1000, function(){
+                    $('tr.simi td div.after').delay(500).show().animate({opacity: '1'}, 1000)
+                });
+            });
+            $("#remember").click(function(){
+                location.reload();
+            })
+
+        </script>
+
+    </div>
+    <div class="contents">
+        <div class="matrices">
+            <table>
+                <caption>History Matrix</caption>
+                <thead>
+                    <tr class="history">
+                        <th>Name</th>
+                        {% for movie in range(num_items) %}
+                            <th>Movie {{ movie }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(num_users) %}
+                    <tr class="history">
+                        <td><div>User{{i}}</div></td>
+                        {% for j in range(num_items) %}
+                            <td><div>{{ history[i][j] }}</div></td>
+                        {% endfor %}
+
+                        {% if history[i]!= updated_hist[i]%}
+                        <tr class="history-update">
+                            <td><div>User{{i}}</div></td>
+                            {% for j in range(num_items) %}
+                                <td><div>{{updated_hist[i][j]}}</div></td>
+                            {% endfor %}
+
+                        </tr>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <table>
+                <caption>Interaction Matrix</caption>
+                <thead>
+                    <tr>
+                        {% for i in range(num_items) %}
+                            <th>Movie {{i}}</td>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="inter">
+                    {% for i in range(num_items) %}
+                        <td>
+                            {% if item_inter[i] != updated_item[i]%}
+                                <div class='before'>{{item_inter[i]}}</div>
+                                <div class='after'>{{ updated_item[i]}}</div>
+                            {% else %}
+                                <div>{{item_inter[i]}}</div>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+ 
+        <table>
+            <caption>Cooccurrence Matrix</caption>
+            <thead>
+                <tr class='cooc'>
+                    <th>Movies</th>
+                    {% for movie in range(num_items) %}
+                        <th>Movie {{ movie }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for i in range(num_items) %}
+                    <tr class='cooc'>
+                        <td><div>Movie{{ loop.index0 }}</div></td>
+                        {% for j in range(num_items) %}
+                            <td>
+                            {% if cooc[i][j] != updated_cooc[i][j] %}
+                                <div class="before">{{cooc[i][j]}}</div>
+                                <div class="after"> {{updated_cooc[i][j]}}</div>
+                            {% else %}
+                                <div>{{ cooc[i][j] }}</div>
+                            {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+        
+        </table>
+        <table>
+            <caption>Similarity Matrix</caption>
+            <thead>
+                <tr>
+                    <th>Movies</th></TH>
+                {% for movie in range(num_items) %}
+                    <th>Movie {{ movie }}</th>
+                {% endfor %}
+                </tr>  
+            </thead>
+            <tbody>
+                {% for i in range(num_items) %}
+                    <tr class="simi">
+                        <td><div>Movie{{loop.index0}}</div></td>
+                        {% for j in range(num_items) %}
+                            <td>
+                                {% if simi[i][j] != updated_simi[i][j]%}
+                                    <div class="before">{{ simi[i][j] }}</div>
+                                    <div class="after">{{updated_simi[i][j]}}</div>
+                                {% else %}
+                                    <div>{{ simi[i][j] }}</div>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+    </div>
+</div>
+<footer>
+    60th 5 Ave, New York, NY, 10011 • Center for Data Science, New York University
+</footer>
+{% endblock %}
+
+

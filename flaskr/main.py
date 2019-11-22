@@ -4,7 +4,7 @@ Setup:
 (if creating a virtual environment)
     a. virtualenv env
     b. source env/bin/activate
-    c. donwload relevant packages to create a project specific developing environment
+    c. pip install -r requirement.txt
 2. $ python main.py static/sample-output.json
 3. cmd+click the local host address.
 4. (optional) Hit shift+command+r (chrome) if css not loading new changes!(cache problem for chrome)

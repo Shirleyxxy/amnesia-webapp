@@ -8,6 +8,11 @@
     <script src= 
 "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"> 
     </script> 
+<style>
+table, th, td {
+    border: 1px solid black;
+  }
+</style>
 </head>  
   
 <body style = "text-align:center;" id = "body">   
@@ -20,9 +25,13 @@
         "font-size: 15px; font-weight: bold;"> 
     </p> 
       
-    <button onclick = "constructTable('#table')"> 
+    <button id="addInteractions"> 
         click here 
     </button> 
+
+    <div id="divInteractions">
+
+    </div>
       
     <br><br> 
       
@@ -112,8 +121,13 @@
         {
             try
             {
-            var dataItem = JSON.parse(data[i]);
-            appendValidObject(dataItem)
+            if (data[i].trim() == "")
+                continue
+            else
+                {
+                var dataItem = JSON.parse(data[i]);
+                appendValidObject(dataItem)
+                }
             }
             catch
             {
@@ -121,6 +135,35 @@
             }
         }
     });
+
+
+    $(function() {	
+    $("#addInteractions").click(function() {
+        if($('#divInteractions table').length > 0)
+        {
+            var row = $('<tr></tr>');
+            for(i=0; i<10; i++){
+                var row1 = $('<td></td>').addClass('bar').text('result ' + i);
+                row.append(row1);
+            }
+            $('#divInteractions table').append(row);
+        }
+        else
+        {
+            var table = $('<table></table>').addClass('foo');
+            for(i=0; i<10; i++){
+                var row = $('<tr></tr>');
+                for(i=0; i<10; i++){
+                    var row1 = $('<td></td>').addClass('bar').text('result ' + i);
+                    table.append(row);
+                    row.append(row1);
+                }
+            }
+            $('#divInteractions').append(table);
+        }
+    });
+});
+
 
 
         var el_up = document.getElementById("GFG_UP"); 

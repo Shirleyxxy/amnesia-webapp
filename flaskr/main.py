@@ -4,7 +4,7 @@ Setup:
 (if creating a virtual environment)
     a. virtualenv env
     b. source env/bin/activate
-    c. pip install -r requirement.txt
+    c. donwload relevant packages to create a project specific developing environment
 2. $ python main.py static/sample-output.json
 3. cmd+click the local host address.
 4. (optional) Hit shift+command+r (chrome) if css not loading new changes!(cache problem for chrome)
@@ -12,6 +12,7 @@ Setup:
 from flask import Flask, render_template, request, redirect, url_for
 #from flask_sqlalchemy import SQLAlchemy
 import sys
+import os
 from utils import *
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///.db'
@@ -28,6 +29,9 @@ app = Flask(__name__, template_folder='template')
 @app.route('/', methods=['GET', 'POST'])
 def index():
 
+    image_folder = os.listdir(os.path.join('static', 'images'))
+    image_filenames = [os.path.join('images', file) for file in image_folder]
+
     json_data, history, item_inter, cooc, simi = read_all(filename, timestamp=0)
     if request.method == 'POST':
         # do stuff when the form is submitted
@@ -36,8 +40,8 @@ def index():
     return render_template('/stage1.html', history= history,
                                           item_inter = item_inter,
                                           cooc = cooc,
-                                          simi = simi)
-
+                                          simi = simi,
+                                          image_names = image_filenames)
 
 @app.route('/update', methods= ['GET', 'POST'])
 def update():

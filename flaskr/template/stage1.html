@@ -28,8 +28,11 @@
                 <caption>History Matrix</caption>
                 <tr>
                     <th>User </th>
-                    {% for movie in item_inter %}
-                        <th>Movie {{ loop.index0 }}</th>
+                    <!-- {% for movie in item_inter %}
+                        <th><img src="{{ user_image }}" alt="User Image" width=90%>Movie {{ loop.index0 }}</th> -->
+                    <!-- {% endfor %} -->
+                    {% for image_name in image_names %}
+                        <th><img src="{{url_for('static', filename=image_name)}}" alt="{{image_name}}" width=50>{{image_name[7:-4]}}</th>
                     {% endfor %}
                 </tr>
                 {% for user in history %}
@@ -45,7 +48,7 @@
                 <caption>Interaction Matrix</caption>
                 <tr>
                     {% for movie in item_inter %}
-                        <th>Movie {{ loop.index0 }}</th>
+                        <th>{{ image_names[loop.index0][7:-4] }}</th>
                     {% endfor %}
                 </tr>
                 <tr>
@@ -61,13 +64,16 @@
                 <caption>Cooccurrence Matrix</caption>
                 <tr>
                     <th>Items</th>
-                    {% for movie in item_inter %}
+                    <!-- {% for movie in item_inter %}
                         <th>Movie {{ loop.index0 }}</th>
+                    {% endfor %} -->
+                    {% for image_name in image_names %}
+                        <th><img src="{{url_for('static', filename=image_name)}}" alt="{{image_name}}" width=50>{{image_name[7:-4]}}</th>
                     {% endfor %}
                 </tr>
                 {% for movie in cooc %}
                 <tr>
-                    <th>Movie {{ loop.index0 }}</th>
+                    <th>{{ image_names[loop.index0][7:-3] }}</th>
                     {% for interaction in movie %}
                         <td>{{ interaction }}</td>
                     {% endfor %}
@@ -81,13 +87,13 @@
                 <caption>Similarity Matrix</caption>
                 <tr>
                     <th>Items</th>
-                    {% for movie in item_inter %}
-                        <th>Movie {{ loop.index0 }}</th>
+                    {% for image_name in image_names %}
+                        <th><img src="{{url_for('static', filename=image_name)}}" alt="{{image_name}}" width=50>{{image_name[7:-4]}}</th>
                     {% endfor %}
                 </tr>
                 {% for movie in simi %}
                 <tr>
-                    <th>Movie {{ loop.index0 }}</th>
+                    <th>{{ image_names[loop.index0][7:-4] }}</th>
                     {% for similarity in movie %}
                         <td>{{ similarity }}</td>
                     {% endfor %}

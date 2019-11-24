@@ -1,0 +1,25 @@
+1. Kafka
+
+# Start local zookeeper server 
+cd kafka_2.12-2.3.0
+bin/zookeeper-server-start.sh config/zookeeper.properties
+
+########### 
+NOTE: If the server seems to be stuck at INFO binding to port 0.0.0.0/0.0.0.0:2181 (org.apache.zookeeper.server.NIOServerCnxnFactory),
+That means the server is running.
+########### 
+
+# Open a new terminal
+
+# Start local Kafka server
+bin/kafka-server-start.sh config/server.properties
+
+
+# Open a new terminal
+
+# Create topics (only needs to be done once)
+bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic interactions
+bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic changes
+
+
+

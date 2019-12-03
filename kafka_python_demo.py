@@ -1,5 +1,19 @@
 """
-Before running, change the first line of all 4 bash files to cd YOUR_DIRECTORY_W_SETUP_DIR
+This python-kafka demo serves as a BACKUP solution
+
+set_up_kafka(): set up kafka and cargo envrionments,  returns a producer 
+where we can directly talk to use the push_command function.
+
+The result from the kafka is written to a file `amnesia_result.json` that is automatically generated
+in the same directory as the kafka setup directory
+
+
+Before running, 
+1. change the KAFKA_PATH to the directory where there is a setup file with kafka folder inside(mine is amnesia-demo)
+2. make sure all bash scripts are executable by command: chmod 755 call_* (within bash_scripts folder)
+
+Next step:
+1. Integrate reading and updating matrices onto web using buttons
 """
 from kafka import KafkaProducer, KafkaConsumer, TopicPartition
 import subprocess
@@ -13,20 +27,21 @@ from flaskr.utils import *
 
 KAFKA_HOSTS = ['localhost:9092']
 KAFKA_VERSION = (0, 10)
-
+KAFKA_PATH = "/Users/Hengyu/Desktop/Git/amnesia-demo"
 def set_up_kafka():
     CURR_CWD = os.getcwd()
-    appscript.app('Terminal').do_script(CURR_CWD+ "/call_zookeeper.sh")  
+    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_zookeeper.sh "+KAFKA_PATH)  
     time.sleep(5)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/call_kafka.sh") 
+    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_kafka.sh "+KAFKA_PATH) 
     time.sleep(10)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/call_cargo.sh") 
+    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_cargo.sh "+KAFKA_PATH) 
     time.sleep(5)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/call_consumer.sh")
+    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_consumer.sh "+KAFKA_PATH)
 
     producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
 
     return producer
+
 
 def push_command(producer, action, action_list):
     if action not in ['Add', 'Remove']:
@@ -67,7 +82,7 @@ updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users
 #%%
 
 ##
-#TODO: click a button update button, read in new matrix, with prev time step and second time step
+#TODO: click a button update button, read in new matrix, update and print with animation
 
 # #%%
 # # Process

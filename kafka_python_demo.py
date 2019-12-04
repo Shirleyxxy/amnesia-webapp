@@ -9,7 +9,7 @@ in the same directory as the kafka setup directory
 
 
 Before running, 
-1. change the KAFKA_PATH to the directory where there is a setup file with kafka folder inside(mine is amnesia-demo)
+1. change the kafka_path to the directory where there is a setup file with kafka folder inside(mine is amnesia-demo)
 2. make sure all bash scripts are executable by command: chmod 755 call_* (within bash_scripts folder)
 
 Next step:
@@ -27,40 +27,41 @@ from flaskr.utils import *
 
 KAFKA_HOSTS = ['localhost:9092']
 KAFKA_VERSION = (0, 10)
-KAFKA_PATH = "/Users/Hengyu/Desktop/Git/amnesia-demo"
-def set_up_kafka():
-    CURR_CWD = os.getcwd()
-    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_zookeeper.sh "+KAFKA_PATH)  
-    time.sleep(5)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_kafka.sh "+KAFKA_PATH) 
-    time.sleep(10)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_cargo.sh "+KAFKA_PATH) 
-    time.sleep(5)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_consumer.sh "+KAFKA_PATH)
+kafka_path = '/Users/Hengyu/Desktop/Git/deml-project-1'
 
-    producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
+# def set_up_kafka(kafka_path):
+#     CURR_CWD = os.getcwd()
+#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_zookeeper.sh "+kafka_path)  
+#     time.sleep(5)
+#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_kafka.sh "+kafka_path) 
+#     time.sleep(10)
+#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_cargo.sh "+kafka_path) 
+#     time.sleep(5)
+#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_consumer.sh "+kafka_path)
 
-    return producer
+#     producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
+
+#     return producer
 
 
-def push_command(producer, action, action_list):
-    if action not in ['Add', 'Remove']:
-        print('Enter valid action: Add or Remove')
-        return
-    temp_dict= {"change": action, "interactions": action_list}
-    temp_input = json.dumps(temp_dict, separators=(',', ':'))
-    producer.send('interactions', bytes(temp_input, encoding = 'utf8'))
-    producer.flush()
-    return 
+# def push_command(producer, action, action_list):
+#     if action not in ['Add', 'Remove']:
+#         print('Enter valid action: Add or Remove')
+#         return
+#     temp_dict= {"change": action, "interactions": action_list}
+#     temp_input = json.dumps(temp_dict, separators=(',', ':'))
+#     producer.send('interactions', bytes(temp_input, encoding = 'utf8'))
+#     producer.flush()
+#     return 
 
 # Below showcases the process of adding and getting results from kafka-python
-producer = set_up_kafka()
+producer = set_up_kafka(kafka_path)
 #%%
 init_list = [[0,0], [0,1], [0,2], [0,4], [1,1], [1,2], [2, 0], [2,1], [2,3], [3,1], [3,3]]
 push_command(producer, 'Add', init_list)
 #%%
 RESULT_FILE = os.getcwd() + '/amnesia_result.json'
-history, item_inter, cooc, simi, all_users, all_items = read_init(RESULT_FILE)
+_, history, item_inter, cooc, simi, all_users, all_items = read_init(RESULT_FILE)
 #%%
 action_list = [[1,1], [1,2]]
 push_command(producer, 'Remove', action_list)

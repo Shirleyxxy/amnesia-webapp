@@ -2,6 +2,14 @@ import numpy as np
 import json
 from fractions import Fraction
 import copy
+import os
+import appscript
+import time
+from kafka import KafkaProducer, KafkaConsumer
+
+
+KAFKA_HOSTS = ['localhost:9092']
+KAFKA_VERSION = (0, 10)
 
 def read_json(filename):
     json_data = [json.loads(line) for line in open(filename, 'r')]
@@ -138,7 +146,7 @@ def read_init(filename):
     item_inter = read_item_iteraction(json_data, 0)
     cooc = read_cooccurences(json_data, 0)
     simi = read_similarity_matrix(json_data, 0)
-    return history, item_inter, cooc, simi, all_users, all_items 
+    return json_data, history, item_inter, cooc, simi, all_users, all_items 
 
 def update_all(json_data,history_matrix, item_inter, cooc, simi,  timestamp, all_users, all_items):
     """
@@ -150,7 +158,7 @@ def update_all(json_data,history_matrix, item_inter, cooc, simi,  timestamp, all
     updated_cooc = cooc_update(cooc, json_data, timestamp)
     updated_simi = simi_update(simi, json_data, timestamp)
 
-    return updated_hist, matrix_update, updated_item, updated_cooc, updated_simi
+    return updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items
 
 
 def update_all_dynamic(filename,history_matrix, item_inter, cooc, simi, all_users, all_items):
@@ -234,3 +242,27 @@ def read_diff(json_data , history_matrix, timestamp, all_users, all_items):
     simi_diff = simi_change(json_data, timestamp)
     return row_update, hist_diff, item_diff, cooc_diff, simi_diff
 
+def set_up_kafka(kafka_path):
+    CURR_CWD = '/'.join(os.getcwd().split('/')[:-1])
+    print(CURR_CWD)
+    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_zookeeper.sh "+kafka_path)  
+    time.sleep(5)
+    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_kafka.sh "+ kafka_path) 
+    time.sleep(10)
+    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_cargo.sh "+ kafka_path) 
+    time.sleep(5)
+    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_consumer.sh " + kafka_path)
+
+    producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
+
+    return producer
+
+def push_command(producer, action, action_list):
+    if action not in ['Add', 'Remove']:
+        print('Enter valid action: Add or Remove')
+        return
+    temp_dict= {"change": action, "interactions": action_list}
+    temp_input = json.dumps(temp_dict, separators=(',', ':'))
+    producer.send('interactions', bytes(temp_input, encoding = 'utf8'))
+    producer.flush()
+    return 

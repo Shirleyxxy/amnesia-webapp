@@ -5,7 +5,7 @@ import copy
 import os
 import appscript
 import time
-from kafka import KafkaProducer, KafkaConsumer
+# from kafka import KafkaProducer, KafkaConsumer
 
 
 KAFKA_HOSTS = ['localhost:9092']
@@ -242,20 +242,20 @@ def read_diff(json_data , history_matrix, timestamp, all_users, all_items):
     simi_diff = simi_change(json_data, timestamp)
     return row_update, hist_diff, item_diff, cooc_diff, simi_diff
 
-def set_up_kafka(kafka_path):
-    CURR_CWD = '/'.join(os.getcwd().split('/')[:-1])
-    print(CURR_CWD)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_zookeeper.sh "+kafka_path)  
-    time.sleep(5)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_kafka.sh "+ kafka_path) 
-    time.sleep(10)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_cargo.sh "+ kafka_path) 
-    time.sleep(5)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_consumer.sh " + kafka_path)
+# def set_up_kafka(kafka_path):
+#     CURR_CWD = '/'.join(os.getcwd().split('/')[:-1])
+#     print(CURR_CWD)
+#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_zookeeper.sh "+kafka_path)  
+#     time.sleep(5)
+#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_kafka.sh "+ kafka_path) 
+#     time.sleep(10)
+#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_cargo.sh "+ kafka_path) 
+#     time.sleep(5)
+#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_consumer.sh " + kafka_path)
 
-    producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
+#     producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
 
-    return producer
+#     return producer
 
 def push_command(producer, action, action_list):
     if action not in ['Add', 'Remove']:

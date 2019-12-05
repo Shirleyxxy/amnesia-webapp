@@ -3,11 +3,11 @@ body{
     font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
     margin: 0px;
     padding: 0px;
-    font-size: 22px;
+    font-size: 20px;
   }
   
   header{
-    font-size: 28px;
+    font-size: 26px;
     background-color: darkslategrey;
     height: 130px;
     margin: 0 px;
@@ -48,7 +48,7 @@ body{
   div.contents{
     padding: 20px;
     background-color: peru;
-    height: 400px;
+    height: 500px;
     display: flex;
     flex-direction: row;
   }
@@ -63,12 +63,16 @@ body{
   }
   
   table {
+    text-align: center;
+    table-layout: fixed;
+    width: 500px;
     background: beige;
     margin: 20px auto;
     color: black;
     border-collapse: collapse;
     border: 1px solid black;
   }
+  
   td, th{
     border: 1px solid black;
   }

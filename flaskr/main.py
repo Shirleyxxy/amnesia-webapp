@@ -31,6 +31,7 @@ def index():
 
     image_folder = os.listdir(os.path.join('static', 'images'))
     image_filenames = [os.path.join('images', file) for file in image_folder]
+    print([file for file in image_folder if file[-3:] == 'jpg'])
 
     json_data, history, item_inter, cooc, simi,all_users, all_items = read_all(filename, timestamp=0)
     if request.method == 'POST':

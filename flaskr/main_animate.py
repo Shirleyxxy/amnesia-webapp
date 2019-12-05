@@ -5,7 +5,7 @@ Setup:
     a. virtualenv env
     b. source env/bin/activate
     c. pip install -r requirement.txt (for universal dev/exe envrionment)
-2. $ python main_animate.py static/sample-outputs.json
+2. $ python main_animate.py static/sample-output.json
 3. cmd+click the local host address.
 4. (optional) Hit shift+command+r (chrome) if css not loading new changes!(cache problem for chrome)
 """
@@ -18,6 +18,9 @@ filename = sys.argv[-1]
 
 @app.route('/')
 def home():
+    image_folder = os.listdir(os.path.join('static', 'images'))
+    image_filenames = [os.path.join('images', file) for file in image_folder if file[-3:] == 'jpg']
+
     json_data, history, item_inter, cooc, simi,all_users, all_items = read_all(filename, 0)
     
     updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items = update_all(json_data, history, item_inter, cooc, simi, 1, all_users, all_items)
@@ -40,7 +43,8 @@ def home():
                                                   updated_hist = updated_hist, 
                                                   updated_item = updated_item, 
                                                   updated_cooc = updated_cooc, 
-                                                  updated_simi = updated_simi)
+                                                  updated_simi = updated_simi,
+                                                  image_names = image_filenames)
 
 
 if __name__ == '__main__':

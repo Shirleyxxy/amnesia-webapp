@@ -2,6 +2,7 @@
 
 {% block styles %}
 {{super()}}
+<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/main_animate.css') }}">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
 
@@ -70,8 +71,15 @@
                 <thead>
                     <tr class="history">
                         <th>Name</th>
-                        {% for movie in range(num_items) %}
+                        <!-- {% for movie in range(num_items) %}
                             <th>Movie {{ movie }}</th>
+                        {% endfor %} -->
+                        {% for image_name in image_names %}
+                            <th>
+                                <img src="{{url_for('static', filename=image_name)}}" alt="{{image_name}}" width=70>
+                                <br>
+                                {{image_name[7:-4]}}
+                            </th>
                         {% endfor %}
                     </tr>
                 </thead>
@@ -100,8 +108,11 @@
                 <caption>Interaction Matrix</caption>
                 <thead>
                     <tr>
-                        {% for i in range(num_items) %}
+                        <!-- {% for i in range(num_items) %}
                             <th>Movie {{i}}</td>
+                        {% endfor %} -->
+                        {% for image_name in image_names %}
+                            <th>{{image_name[7:-4]}}</th>
                         {% endfor %}
                     </tr>
                 </thead>
@@ -127,8 +138,12 @@
             <thead>
                 <tr class='cooc'>
                     <th>Movies</th>
-                    {% for movie in range(num_items) %}
-                        <th>Movie {{ movie }}</th>
+                    {% for image_name in image_names %}
+                        <th>
+                            <img src="{{url_for('static', filename=image_name)}}" alt="{{image_name}}" width=70>
+                            <br>
+                            {{image_name[7:-4]}}
+                        </th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -136,7 +151,7 @@
             <tbody>
                 {% for i in range(num_items) %}
                     <tr class='cooc'>
-                        <td><div>Movie{{ loop.index0 }}</div></td>
+                        <td><div>{{ image_names[loop.index0][7:-4] }}</div></td>
                         {% for j in range(num_items) %}
                             <td>
                             {% if cooc[i][j] != updated_cooc[i][j] %}
@@ -157,16 +172,20 @@
             <caption>Similarity Matrix</caption>
             <thead>
                 <tr>
-                    <th>Movies</th></TH>
-                {% for movie in range(num_items) %}
-                    <th>Movie {{ movie }}</th>
-                {% endfor %}
+                    <th>Movies</th>
+                    {% for image_name in image_names %}
+                    <th>
+                        <img src="{{url_for('static', filename=image_name)}}" alt="{{image_name}}" width=70>
+                        <br>
+                        {{image_name[7:-4]}}
+                    </th>
+                    {% endfor %}
                 </tr>  
             </thead>
             <tbody>
                 {% for i in range(num_items) %}
                     <tr class="simi">
-                        <td><div>Movie{{loop.index0}}</div></td>
+                        <td><div>{{ image_names[loop.index0][7:-4] }}</div></td>
                         {% for j in range(num_items) %}
                             <td>
                                 {% if simi[i][j] != updated_simi[i][j]%}

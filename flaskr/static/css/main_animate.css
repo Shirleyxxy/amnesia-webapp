@@ -48,7 +48,7 @@ body{
   div.contents{
     padding: 20px;
     background-color: peru;
-    height: 500px;
+    height: 420px;
     display: flex;
     flex-direction: row;
   }
@@ -71,6 +71,7 @@ body{
     color: black;
     border-collapse: collapse;
     border: 1px solid black;
+    font-size: 16px;
   }
   
   td, th{
@@ -109,6 +110,7 @@ body{
   
   footer{
     background-color: darkslategrey;
+    color: bisque;
   }
   caption{
     font-weight: bold;

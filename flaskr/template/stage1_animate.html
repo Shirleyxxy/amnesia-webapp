@@ -81,6 +81,7 @@
                                 {{image_name[7:-4]}}
                             </th>
                         {% endfor %}
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -90,6 +91,7 @@
                         {% for j in range(num_items) %}
                             <td><div>{{ history[i][j] }}</div></td>
                         {% endfor %}
+                        <td><div><a href="/delete/">Delete</a></div></td>
 
                         {% if history[i]!= updated_hist[i]%}
                         <tr class="history-update">
@@ -108,9 +110,6 @@
                 <caption>Interaction Matrix</caption>
                 <thead>
                     <tr>
-                        <!-- {% for i in range(num_items) %}
-                            <th>Movie {{i}}</td>
-                        {% endfor %} -->
                         {% for image_name in image_names %}
                             <th>{{image_name[7:-4]}}</th>
                         {% endfor %}

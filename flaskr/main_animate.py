@@ -18,9 +18,9 @@ filename = sys.argv[-1]
 
 @app.route('/')
 def home():
-    json_data, history, item_inter, cooc, simi = read_all(filename, 0)
+    json_data, history, item_inter, cooc, simi,all_users, all_items = read_all(filename, 0)
     
-    updated_hist, matrix_update, updated_item, updated_cooc, updated_simi = update_all(json_data, history, item_inter, cooc, simi, 1)
+    updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items = update_all(json_data, history, item_inter, cooc, simi, 1, all_users, all_items)
 
     # row_diff, hist_diff, item_diff, cooc_diff, simi_diff = read_diff(json_data,history,1)
     desired = matrix_update.index(0)+1 # considering the header here (temp implementations)

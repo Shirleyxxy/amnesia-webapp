@@ -32,7 +32,7 @@ def index():
     image_folder = os.listdir(os.path.join('static', 'images'))
     image_filenames = [os.path.join('images', file) for file in image_folder]
 
-    json_data, history, item_inter, cooc, simi = read_all(filename, timestamp=0)
+    json_data, history, item_inter, cooc, simi,all_users, all_items = read_all(filename, timestamp=0)
     if request.method == 'POST':
         # do stuff when the form is submitted
         return redirect(url_for('update'))
@@ -47,9 +47,9 @@ def index():
 def update():
     if request.method == 'POST':
         return redirect(url_for('index'))
-    json_data, history, item_inter, cooc, simi = read_all(filename, timestamp=0)
+    json_data, history, item_inter, cooc, simi, all_users, all_items = read_all(filename, timestamp=0)
 
-    updated_hist, matrix_update, updated_item, updated_cooc, updated_simi = update_all(json_data, history, item_inter, cooc, simi, 1)
+    updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items = update_all(json_data, history, item_inter, cooc, simi, 1, all_users, all_items)
     return render_template('/stage1_update.html', history= updated_hist,
                                           item_inter = updated_item,
                                           cooc = updated_cooc,

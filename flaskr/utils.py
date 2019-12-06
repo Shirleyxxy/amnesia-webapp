@@ -5,7 +5,7 @@ import copy
 import os
 import appscript
 import time
-# from kafka import KafkaProducer, KafkaConsumer
+from kafka import KafkaProducer, KafkaConsumer
 
 
 KAFKA_HOSTS = ['localhost:9092']
@@ -91,6 +91,8 @@ def read_add(json_data):
 def history_update(history_matrix, json_data, timestamp, all_users, all_items):
     """
     This method makes a deep copy hence the original history_matrix will not be changed
+    History matrix will be 0,1 only, indicating whether the user has seen the movie
+    or not.
     """
     updated_hist = copy.deepcopy(history_matrix)
     deletion = read_delete(read_action(read_time(json_data, timestamp), 'interactions'))
@@ -100,13 +102,22 @@ def history_update(history_matrix, json_data, timestamp, all_users, all_items):
         for change in deletion:
             updated_hist[change['user']][change['item']] += change['change']
 
-    if addition: #if there is addition, always append at the end
-        all_users.append(addition[0]['user'])
+    # if addition: #if there is addition, always append at the end
+    #     all_users.append(addition[0]['user'])
+    #     added_items = sorted([x['item'] for x in addition])
+    #     updated_hist.append([1 if x in added_items else 0 for x in all_items])
+    if addition: # Modified to potentially add in movies
+        add_user = addition[0]['user']
         added_items = sorted([x['item'] for x in addition])
-        updated_hist.append([1 if x in added_items else 0 for x in all_items])
+        updated_item = [1 if x in added_items else 0 for x in all_items]
+        if add_user in all_users: #If the user already exists
+            updated_hist[add_user] = updated_item
+        else: #If adding a new user
+            updated_hist.append(updated_item)
+            all_users.append(add_user)
 
     matrix_update = [0 if all(i==0 for i in x ) else 1 for x in updated_hist]
-
+    
     return updated_hist, matrix_update, all_users, all_items
 
 def item_inter_update(item_inter, json_data, timestamp=1):
@@ -140,13 +151,20 @@ def read_all(filename, timestamp=0):
     simi = read_similarity_matrix(json_data, timestamp)
     return json_data, history, item_inter, cooc, simi, all_users, all_items
 
-def read_init(filename):
-    json_data = read_json(filename)
+# def read_init(filename):
+#     json_data = read_json(filename)
+#     history, all_users, all_items = read_history(json_data, 0)
+#     item_inter = read_item_iteraction(json_data, 0)
+#     cooc = read_cooccurences(json_data, 0)
+#     simi = read_similarity_matrix(json_data, 0)
+#     return json_data, history, item_inter, cooc, simi, all_users, all_items 
+
+def read_init(json_data):
     history, all_users, all_items = read_history(json_data, 0)
     item_inter = read_item_iteraction(json_data, 0)
     cooc = read_cooccurences(json_data, 0)
     simi = read_similarity_matrix(json_data, 0)
-    return json_data, history, item_inter, cooc, simi, all_users, all_items 
+    return history, item_inter, cooc, simi, all_users, all_items 
 
 def update_all(json_data,history_matrix, item_inter, cooc, simi,  timestamp, all_users, all_items):
     """
@@ -161,20 +179,32 @@ def update_all(json_data,history_matrix, item_inter, cooc, simi,  timestamp, all
     return updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items
 
 
-def update_all_dynamic(filename,history_matrix, item_inter, cooc, simi, all_users, all_items):
+# def update_all_dynamic(filename,history_matrix, item_inter, cooc, simi, all_users, all_items):
+#     """
+#     Dynamically extracts the latest update given a json file, requiring the previous matrices
+#     must be the most updated result of the previous timestamp
+#     """
+#     json_data = read_json(filename)
+#     latest_time = json_data[-1]['time']
+#     updated_hist, matrix_update, all_users, all_items = history_update(history_matrix, json_data, latest_time, all_users, all_items)
+#     updated_item = item_inter_update(item_inter, json_data, latest_time)
+#     updated_cooc = cooc_update(cooc, json_data, latest_time)
+#     updated_simi = simi_update(simi, json_data, latest_time)
+
+#     return updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items
+
+def update_all_latest(updated_json, history_matrix, item_inter, cooc, simi, all_users, all_items):
     """
-    Dynamically extracts the latest update given a json file, requiring the previous matrices
-    must be the most updated result of the previous timestamp
+    This file feed in only the updates hence more efficient
     """
-    json_data = read_json(filename)
-    latest_time = json_data[-1]['time']
-    updated_hist, matrix_update, all_users, all_items = history_update(history_matrix, json_data, latest_time, all_users, all_items)
-    updated_item = item_inter_update(item_inter, json_data, latest_time)
-    updated_cooc = cooc_update(cooc, json_data, latest_time)
-    updated_simi = simi_update(simi, json_data, latest_time)
+    latest_time = updated_json[-1]['time']
+    updated_hist, matrix_update, all_users, all_items = history_update(history_matrix, updated_json, latest_time, all_users, all_items)
+    updated_item = item_inter_update(item_inter, updated_json, latest_time)
+    updated_cooc = cooc_update(cooc, updated_json, latest_time)
+    updated_simi = simi_update(simi, updated_json, latest_time)
 
     return updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items
-
+    
 
 """
 The following functions read in the differences between before and after matrices. 
@@ -242,20 +272,20 @@ def read_diff(json_data , history_matrix, timestamp, all_users, all_items):
     simi_diff = simi_change(json_data, timestamp)
     return row_update, hist_diff, item_diff, cooc_diff, simi_diff
 
-# def set_up_kafka(kafka_path):
-#     CURR_CWD = '/'.join(os.getcwd().split('/')[:-1])
-#     print(CURR_CWD)
-#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_zookeeper.sh "+kafka_path)  
-#     time.sleep(5)
-#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_kafka.sh "+ kafka_path) 
-#     time.sleep(10)
-#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_cargo.sh "+ kafka_path) 
-#     time.sleep(5)
-#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_consumer.sh " + kafka_path)
+def set_up_kafka(kafka_path):
+    CURR_CWD = '/'.join(os.getcwd().split('/')[:-1])
+    print(CURR_CWD)
+    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_zookeeper.sh "+kafka_path)  
+    time.sleep(5)
+    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_kafka.sh "+ kafka_path) 
+    time.sleep(10)
+    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_cargo.sh "+ kafka_path) 
+    #time.sleep(5)
+    #appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_consumer.sh " + kafka_path)
 
-#     producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
+    producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
 
-#     return producer
+    return producer
 
 def push_command(producer, action, action_list):
     if action not in ['Add', 'Remove']:
@@ -266,3 +296,9 @@ def push_command(producer, action, action_list):
     producer.send('interactions', bytes(temp_input, encoding = 'utf8'))
     producer.flush()
     return 
+
+def enqueue_output(out, queue):
+    for line in iter(out.readline, b''):
+        queue.put(line)
+    out.close()
+

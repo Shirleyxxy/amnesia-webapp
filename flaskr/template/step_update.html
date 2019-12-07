@@ -19,13 +19,16 @@
 <div class="container">
     <div class="buttons">
         <form method="POST">
-            <button type="submit"> Next Time step! </button>
+            <input type="submit" name = "submit_button" value= "Next Step!">
+            <input type="submit" name="submit_button" value='Print Hello World'>
+            <input type="text" name="add_text">
+            <input type="submit" name="submit_button" value="Add" id="add_button">
+
         </form>
 
     </div>
     <div class="contents">
         <div class="matrices">
-            <p>The current timestamp is {{timestamp}}</p>
                 <table>
                     <caption>History Matrix</caption>
                     <thead>
@@ -34,27 +37,184 @@
                             {% for movie in range(num_items) %}
                                 <th>Movie {{ movie }}</th>
                             {% endfor %}
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for i in range(num_users) %}
-                        <tr class="history">
-                            <td><div>User{{i}}</div></td>
-                            {% for j in range(num_items) %}
-                                <td><div>{{ history[i][j] }}</div></td>
-                            {% endfor %}
-    
-                        </tr>
+                            {% if matrix_update[i] == 0 %}
+                                <tr class="history disappear">
+                                    <td><div>User{{i}}</div></td>
+                                        {% for j in range(num_items) %}
+                                            <td>
+                                                {% if before_hist[i][j] != history[i][j] %}
+                                                    <div class="before disappear"> {{before_hist[i][j]}}</div>
+                                                    <div class="after disappear">{{ history[i][j] }}</div>
+                                                {% else %}
+                                                    <div>{{ history[i][j] }}</div>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                        <form method="POST">
+                                            <td><div class="disappear"><input type="submit" name="delete_button" value="Delete User {{i}}"></div></td>
+                                        </form>
+                                </tr>
+                            {% elif matrix_update[i] == -1 %}
+                                <tr class="history noshow">
+                                    <td><div>User{{i}}</div></td>
+                                        {% for j in range(num_items) %}
+                                            <td>
+                                                {% if before_hist[i][j] != history[i][j] %}
+                                                    <div class="before noshow">{{before_hist[i][j]}}</div>
+                                                    <div class="after noshow">{{ history[i][j] }}</div>
+                                                {% else %}
+                                                    <div>{{ history[i][j] }}</div>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                        <form method="POST">
+                                            <td><div class="noshow"><input type="submit" name="delete_button" value="Delete User {{i}}"></div></td>
+                                        </form>
+                                </tr>
+                            {% else %}
+                                <tr class="history">
+                                    <td><div>User{{i}}</div></td>
+                                        {% for j in range(num_items) %}
+                                            <td>
+                                                {% if before_hist[i][j] != history[i][j] %}
+                                                    <div class="before">{{before_hist[i][j]}}</div>
+                                                    <div class="after">{{ history[i][j] }}</div>
+                                                {% else %}
+                                                    <div>{{ history[i][j] }}</div>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                        <form method="POST">
+                                            <td><div><input type="submit" name="delete_button" value="Delete User {{i}}"></div></td>
+                                        </form>
+                                </tr>
+                            {% endif %}
+                            
+                            
                         {% endfor %}
                     </tbody>
                 </table>
+                <table>
+                    <caption>Interaction Matrix</caption>
+                    <thead>
+                        <tr>
+                            {% for i in range(num_items) %}
+                                <th>Movie {{i}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="inter">
+                            {% for i in range(num_items) %}
+                            <td>
+                                {% if before_item[i] != item_inter[i]%}
+                                    <div class='before'>{{ before_item[i] }}</div>
+                                    <div class='after'>{{ item_inter[i] }}</div>
+                                {% else %}
+                                    <div>{{before_item[i]}}</div>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
         </div>
+        <table>
+            <caption>Cooccurrence Matrix</caption>
+            <thead>
+                <tr class='cooc'>
+                    <th>Movies</th>
+                    {% for i in range(num_items)%}
+                    <th>Movei {{i}}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for i in range(num_items) %}
+                    <tr class='cooc'>
+                        <td><div>Movie {{i}}</div></td>
+                        {% for j in range(num_items) %}
+                            <td>
+                                {% if before_cooc[i][j] != cooc[i][j] %}
+                                    <div class='before'>{{ before_cooc[i][j] }}</div>
+                                    <div class='after'>{{ cooc[i][j] }}</div>
+                                {% else %}
+                                    <div>{{ cooc[i][j] }}</div>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+        
+        </table>
+        <table>
+            <caption>Similarity Matrix</caption>
+            <thead>
+                <tr>
+                    <th>Movies</th>
+                    {% for i in range(num_items) %}
+                    <th>Movie {{i}}</th>
+                    {% endfor %}
+                </tr>  
+            </thead>
+            <tbody>
+                {% for i in range(num_items) %}
+                    <tr class="simi">
+                        <td><div>Movie {{i}}</div></td>
+                        {% for j in range(num_items) %}
+                            <td>
+                                {% if before_simi[i][j] != simi[i][j] %}
+                                    <div class='before'>{{ before_simi[i][j] }}</div>
+                                    <div class='after'>{{ simi[i][j] }}</div>
+                                {% else %}
+                                    <div>{{ simi[i][j] }}</div>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
     </div>
 </div>
 
 <footer>
     60th 5 Ave, New York, NY, 10011 • Center for Data Science, New York University
 </footer>
+
+<script>
+    $(document).ready(function(){
+
+        $('tr.history td div.before').delay(2000).fadeOut(1000, function(){
+            $('tr.history td div.after').delay(500).show().animate({opacity:'1'}, 1000);
+            $('.disappear').delay(500).fadeOut(1000);
+        });
+
+        $('tr.inter td div.before').delay(2000).fadeToggle(1000, function(){
+            $('tr.inter td div.after').delay(500).show().animate({opacity:'1'}, 1000);
+        });
+
+        $('tr.cooc td div.before').delay(4000).fadeToggle(1000, function(){
+            $('tr.cooc td div.after').delay(500).show().animate({opacity:'1'}, 1000);
+
+        });      
+        $('tr.simi td div.before').delay(6000).fadeToggle(1000, function(){
+            $('tr.simi td div.after').delay(500).show().animate({opacity:'1'}, 1000);
+
+        });    
+    
+    })
+
+
+</script>
+
 {% endblock %}
-
-

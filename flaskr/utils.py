@@ -5,7 +5,8 @@ import copy
 import os
 import appscript
 import time
-from kafka import KafkaProducer, KafkaConsumer
+#from kafka import KafkaProducer, KafkaConsumer
+import ast
 
 
 KAFKA_HOSTS = ['localhost:9092']
@@ -93,7 +94,11 @@ def history_update(history_matrix, json_data, timestamp, all_users, all_items):
     This method makes a deep copy hence the original history_matrix will not be changed
     History matrix will be 0,1 only, indicating whether the user has seen the movie
     or not.
+    matrix_update: 1 show, -1 not show, 0 show then disappaer
     """
+    # Create matrix_update 1 if row not emptym -1 (will now shown) if row empty for o
+    matrix_update = [-1 if all(i==0 for i in x ) else 1 for x in history_matrix]
+
     updated_hist = copy.deepcopy(history_matrix)
     deletion = read_delete(read_action(read_time(json_data, timestamp), 'interactions'))
     addition = read_add(read_action(read_time(json_data, timestamp), 'interactions'))
@@ -102,10 +107,7 @@ def history_update(history_matrix, json_data, timestamp, all_users, all_items):
         for change in deletion:
             updated_hist[change['user']][change['item']] += change['change']
 
-    # if addition: #if there is addition, always append at the end
-    #     all_users.append(addition[0]['user'])
-    #     added_items = sorted([x['item'] for x in addition])
-    #     updated_hist.append([1 if x in added_items else 0 for x in all_items])
+
     if addition: # Modified to potentially add in movies
         add_user = addition[0]['user']
         added_items = sorted([x['item'] for x in addition])
@@ -115,33 +117,98 @@ def history_update(history_matrix, json_data, timestamp, all_users, all_items):
         else: #If adding a new user
             updated_hist.append(updated_item)
             all_users.append(add_user)
+            matrix_update.append(0 if all(y==0 for y in updated_item) else 1)
+            #Additional line for consistency
+            history_matrix.append([0]*len(all_items))
 
-    matrix_update = [0 if all(i==0 for i in x ) else 1 for x in updated_hist]
+    for i,x in enumerate(matrix_update):
+        if x == 1 and all(y ==0 for y in updated_hist[i]):
+            matrix_update[i] = 0
+        
     
-    return updated_hist, matrix_update, all_users, all_items
+    return history_matrix, updated_hist, matrix_update, all_users, all_items
 
-def item_inter_update(item_inter, json_data, timestamp=1):
-    updated_inter = copy.deepcopy(item_inter)
-    changes = read_add(read_action(read_time(json_data, timestamp), 'item_interactions_n'))
+# def item_inter_update(item_inter, json_data, timestamp=1):
+#     updated_inter = copy.deepcopy(item_inter)
+#     changes = read_add(read_action(read_time(json_data, timestamp), 'item_interactions_n'))
+#     for change in changes:
+#         updated_inter[change['item']] = change['count']
+#     return updated_inter
+
+def item_inter_update(item_inter, json_update, timestamp = 1):
+    """
+    Correct order of delete then add
+    """
+    updated_item_inter = copy.deepcopy(item_inter)
+    changes = read_action(read_time(json_update, timestamp),'item_interactions_n')
     for change in changes:
-        updated_inter[change['item']] = change['count']
-    return updated_inter
+        if change['change'] == -1:
+            updated_item_inter[change['item']] = 0
+        else:
+            updated_item_inter[change['item']] = change['count']
+    return updated_item_inter
 
-def cooc_update(cooc, json_data, timestamp=1):
+# def cooc_update(cooc, json_data, timestamp=1):
+#     updated_cooc = copy.deepcopy(cooc)
+#     changes = read_add(read_action(read_time(json_data, timestamp), 'cooccurrences_c'))
+#     for change in changes:
+#         updated_cooc[change['item_a']][change['item_b']] = change['num_cooccurrences']
+#         updated_cooc[change['item_b']][change['item_a']] = change['num_cooccurrences']
+#     return updated_cooc
+def cooc_update(cooc, json_update, timestamp = 1):
     updated_cooc = copy.deepcopy(cooc)
-    changes = read_add(read_action(read_time(json_data, timestamp), 'cooccurrences_c'))
-    for change in changes:
-        updated_cooc[change['item_a']][change['item_b']] = change['num_cooccurrences']
-        updated_cooc[change['item_b']][change['item_a']] = change['num_cooccurrences']
-    return updated_cooc
+    changes = read_action(read_time(json_update, timestamp), 'cooccurrences_c')
+    num_items = len(cooc)
+    cooc_buffer = (-1*np.ones((num_items, num_items), dtype = int)).tolist()
+    for change in changes:#if adding, should be the buffer should always be loaded off
+        if change['change'] == 1:
+            cooc_buffer[change['item_a']][change['item_b']] = change['num_cooccurrences']
+            cooc_buffer[change['item_b']][change['item_a']] = change['num_cooccurrences']
+        else: #deletion
+            if cooc_buffer[change['item_a']][change['item_b']] == -1:
+                updated_cooc[change['item_a']][change['item_b']]=0
+                updated_cooc[change['item_b']][change['item_a']]=0
+            else: #load the buffer
+                updated_cooc[change['item_a']][change['item_b']]=cooc_buffer[change['item_a']][change['item_b']]
+                updated_cooc[change['item_b']][change['item_a']]=cooc_buffer[change['item_b']][change['item_a']]
+                cooc_buffer[change['item_a']][change['item_b']] = -1
+                cooc_buffer[change['item_b']][change['item_a']] =-1
+    for i in range(num_items):
+        for j in range(num_items):
+            if cooc_buffer[i][j] != -1:
+                updated_cooc[i][j] = cooc_buffer[i][j]
+    return updated_cooc      
 
-def simi_update(simi, json_data, timestamp=1):
+# def simi_update(simi, json_data, timestamp=1):
+#     updated_simi = copy.deepcopy(simi)
+#     changes = read_add(read_action(read_time(json_data, timestamp), 'similarities_s'))
+#     for change in changes:
+#         updated_simi[change['item_a']][change['item_b']] = str(Fraction(change['similarity']).limit_denominator())
+#         updated_simi[change['item_b']][change['item_a']] = str(Fraction(change['similarity']).limit_denominator())
+#     return updated_simi
+def simi_update(simi, json_update, timestamp = 1):
     updated_simi = copy.deepcopy(simi)
-    changes = read_add(read_action(read_time(json_data, timestamp), 'similarities_s'))
-    for change in changes:
-        updated_simi[change['item_a']][change['item_b']] = str(Fraction(change['similarity']).limit_denominator())
-        updated_simi[change['item_b']][change['item_a']] = str(Fraction(change['similarity']).limit_denominator())
-    return updated_simi
+    changes = read_action(read_time(json_update, timestamp), 'similarities_s')
+    num_items = len(simi)
+    simi_buffer = (-1*np.ones((num_items, num_items), dtype = int)).tolist()
+    for change in changes:#if adding, should be the buffer should always be loaded off
+        if change['change'] == 1:
+            simi_buffer[change['item_a']][change['item_b']] = str(Fraction(change['similarity']).limit_denominator())
+            simi_buffer[change['item_b']][change['item_a']] = str(Fraction(change['similarity']).limit_denominator())
+        else: #deletion
+            if simi_buffer[change['item_a']][change['item_b']] == -1:
+                updated_simi[change['item_a']][change['item_b']]=0
+                updated_simi[change['item_b']][change['item_a']]=0
+            else: #load the buffer
+                updated_simi[change['item_a']][change['item_b']]=simi_buffer[change['item_a']][change['item_b']]
+                updated_simi[change['item_b']][change['item_a']]=simi_buffer[change['item_b']][change['item_a']]
+                simi_buffer[change['item_a']][change['item_b']] = -1
+                simi_buffer[change['item_b']][change['item_a']] =-1
+    for i in range(num_items):
+        for j in range(num_items):
+            if simi_buffer[i][j] != -1:
+                updated_simi[i][j] = simi_buffer[i][j]
+    return updated_simi  
 
 def read_all(filename, timestamp=0):
     json_data = read_json(filename)
@@ -164,19 +231,19 @@ def read_init(json_data):
     item_inter = read_item_iteraction(json_data, 0)
     cooc = read_cooccurences(json_data, 0)
     simi = read_similarity_matrix(json_data, 0)
-    return history, item_inter, cooc, simi, all_users, all_items 
+    return history, item_inter, cooc, simi, all_users, all_items  
 
 def update_all(json_data,history_matrix, item_inter, cooc, simi,  timestamp, all_users, all_items):
     """
     This function is used when specific timestamp is requirement.
     Not applicable anymore but kept for future reference if needed
     """
-    updated_hist, matrix_update, all_users, all_items = history_update(history_matrix, json_data, timestamp, all_users, all_items)
+    orig_history, updated_hist, matrix_update, all_users, all_items = history_update(history_matrix, json_data, timestamp, all_users, all_items)
     updated_item = item_inter_update(item_inter, json_data, timestamp)
     updated_cooc = cooc_update(cooc, json_data, timestamp)
     updated_simi = simi_update(simi, json_data, timestamp)
 
-    return updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items
+    return orig_hist, updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items
 
 
 # def update_all_dynamic(filename,history_matrix, item_inter, cooc, simi, all_users, all_items):
@@ -198,12 +265,12 @@ def update_all_latest(updated_json, history_matrix, item_inter, cooc, simi, all_
     This file feed in only the updates hence more efficient
     """
     latest_time = updated_json[-1]['time']
-    updated_hist, matrix_update, all_users, all_items = history_update(history_matrix, updated_json, latest_time, all_users, all_items)
+    orig_hist, updated_hist, matrix_update, all_users, all_items = history_update(history_matrix, updated_json, latest_time, all_users, all_items)
     updated_item = item_inter_update(item_inter, updated_json, latest_time)
     updated_cooc = cooc_update(cooc, updated_json, latest_time)
     updated_simi = simi_update(simi, updated_json, latest_time)
 
-    return updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items
+    return orig_hist, updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items
     
 
 """
@@ -272,20 +339,20 @@ def read_diff(json_data , history_matrix, timestamp, all_users, all_items):
     simi_diff = simi_change(json_data, timestamp)
     return row_update, hist_diff, item_diff, cooc_diff, simi_diff
 
-def set_up_kafka(kafka_path):
-    CURR_CWD = '/'.join(os.getcwd().split('/')[:-1])
-    print(CURR_CWD)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_zookeeper.sh "+kafka_path)  
-    time.sleep(5)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_kafka.sh "+ kafka_path) 
-    time.sleep(10)
-    appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_cargo.sh "+ kafka_path) 
-    #time.sleep(5)
-    #appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_consumer.sh " + kafka_path)
+# def set_up_kafka(kafka_path):
+#     CURR_CWD = '/'.join(os.getcwd().split('/')[:-1])
+#     print(CURR_CWD)
+#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_zookeeper.sh "+kafka_path)  
+#     time.sleep(5)
+#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_kafka.sh "+ kafka_path) 
+#     time.sleep(10)
+#     appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_cargo.sh "+ kafka_path) 
+#     #time.sleep(5)
+#     #appscript.app('Terminal').do_script(CURR_CWD+ "/bash_scripts/call_consumer.sh " + kafka_path)
 
-    producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
+#     producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
 
-    return producer
+#     return producer
 
 def push_command(producer, action, action_list):
     if action not in ['Add', 'Remove']:
@@ -301,4 +368,29 @@ def enqueue_output(out, queue):
     for line in iter(out.readline, b''):
         queue.put(line)
     out.close()
+
+def convert_to_query_add(input_string, all_users, all_items):
+    """
+    In this version, the input_string needs to comma separated
+    """
+    list_string = '['+ input_string + ']'
+    item_list = ast.literal_eval(list_string)
+    # if some are not in the list: raise a warning
+    if not all([x in all_items for x in item_list]):
+        return []
+    curr_user = max(all_users)+1 # Create a new user
+    action_list = [[curr_user, x] for x in item_list]
+    return action_list
+    
+def convert_to_query_delete(to_be_delete_user, history_matrix, all_users):
+    """
+    Delete user must be within
+    TODO need to deal with situation when the user is already not there?
+    """
+    if to_be_delete_user not in all_users:
+        return []
+    num_items = len(history_matrix[0])
+    curr_items = [i for i, x in enumerate(history_matrix[to_be_delete_user]) if x == 1]
+    action_list = [[to_be_delete_user, x] for x in curr_items]
+    return action_list
 

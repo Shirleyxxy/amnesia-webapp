@@ -115,5 +115,8 @@ body{
   caption{
     font-weight: bold;
   }
+  .noshow{
+    display: none;
+  }
   
   

@@ -1,17 +1,18 @@
-'''
-This version does not deal write additional file compared with kafka_flask_demo.py
-
-This file contains a demo for using kafka with python for real-time update
-
-Include Cargo file from amnesia-demo. Build the cargo envrionment first.
-
-Did NOT implement the user interaction, hence can only click the update once
-for dummy demo purpose(with fixed next step update)
-
+"""
 Before running, change the kafka_path to be the path of the directory where insisde,
 there is a setup directory with kafka folder(as the one in amnesia-demo). Or change the bash
 scripts for proper setup.
-'''
+
+This file requrires manually start zoo, kafka and cargo, then run python kafka_falsk_speedup.py
+
+Include interface
+
+Has not designed pictures and name dictionary.
+
+Not fault proof
+
+Add shoud be column separated: '1,2,3'
+"""
 from flask import Flask, render_template, redirect, url_for, request, session
 from utils import *
 import os
@@ -22,20 +23,23 @@ from queue import Queue, Empty
 import json
 import shlex
 import sys
+from kafka import KafkaProducer
 
-KAFKA_PATH = '/Users/Hengyu/Desktop/Git/deml-project-1'
+KAFKA_PATH = os.getcwd()
 KAFKA_HOSTS = ['localhost:9092']
 KAFKA_VERSION = (0, 10)
 
+
 # Set up kafka environment
-producer = set_up_kafka(KAFKA_PATH)
-time.sleep(5) # pause for commiting
-#producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
+
+producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
+
 
 # Set up consumer thread for reading
 ON_POSIX = 'posix' in sys.builtin_module_names
 CONSUMER_COMMANDS = KAFKA_PATH + '/setup/kafka_2.12-2.3.0/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic changes'
 CONSUMER_COMMANDS = shlex.split(CONSUMER_COMMANDS)
+
 p = Popen(CONSUMER_COMMANDS, stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
 q = Queue()
 t = Thread(target=enqueue_output, args=(p.stdout, q))
@@ -61,12 +65,19 @@ def index():
     history, item_inter, cooc, simi, all_users, all_items = read_init(curr_list)
 
     # Store for continuous update
+
+    session['before_hist'] = history
+    session['before_item'] = item_inter
+    session['before_cooc'] = cooc
+    session['before_simi'] = simi
+    
     session['history'] = history
     session['item_inter'] = item_inter
     session['cooc'] = cooc
     session['simi'] = simi
     session['all_users'] = all_users
     session['all_items'] = all_items
+    session['matrix_update'] = []
 
     timestamp = 0
     return redirect(url_for('step_update', timestamp = timestamp))
@@ -74,44 +85,98 @@ def index():
 @app.route('/step_update/<timestamp>', methods = ['GET', 'POST'])
 def step_update(timestamp):
     if request.method == 'POST':
+        if 'delete_button' in request.form:
+            to_be_delete_user = int(request.form['delete_button'].split()[-1])
 
-        timestamp = int(timestamp)+1
-        # Dummy demo purpose, TODO: connect with user interface later
-        # Here is a fixed update 
-        action_list = [[1,1], [1,2]]
-        push_command(producer, 'Remove', action_list)
-        # Pause for file writing
-        time.sleep(1.2)
-        # Extract the latest update from kafka result
-        updates = [json.loads(x.decode(encoding = 'utf8').strip()) for x in list(q.queue)]
-        q.queue.clear()
-        
-        updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items = update_all_latest(updates, 
-                                                                                                                session['history'],
-                                                                                                                session['item_inter'], 
-                                                                                                                session['cooc'], 
-                                                                                                                session['simi'], 
-                                                                                                                session['all_users'], 
-                                                                                                                session['all_items'])
-        # Update the session variable 
-        session['history'] = updated_hist
-        session['item_inter'] = updated_item
-        session['cooc'] = updated_cooc
-        session['simi'] = updated_simi
-        session['all_users'] = all_users
-        session['all_items'] = all_items
+            timestamp = int(timestamp)+1
+            action_list = convert_to_query_delete(to_be_delete_user, session['history'], session['all_users'])
+            push_command(producer, 'Remove', action_list)
+            time.sleep(1.2)
+            updates = [json.loads(x.decode(encoding = 'utf8').strip()) for x in list(q.queue)]
+            q.queue.clear()
+            before_hist, updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items = update_all_latest(updates, 
+                                                                                                                    session['history'],
+                                                                                                                    session['item_inter'], 
+                                                                                                                    session['cooc'], 
+                                                                                                                    session['simi'], 
+                                                                                                                    session['all_users'], 
+                                                                                                                    session['all_items'])
+            # Update the session variable 
+            session['before_hist'] = before_hist
+            session['history'] = updated_hist
+            
+            session['before_item'] = session['item_inter']
+            session['item_inter'] = updated_item
 
-        return redirect(url_for('step_update', history = session['history'], 
-                                timestamp = timestamp, 
-                                num_users = len(session['all_users']), 
-                                num_items = len(session['all_items']) ))
+            session['before_cooc'] = session['cooc']
+            session['cooc'] = updated_cooc
 
+            session['before_simi'] = session['simi']
+            session['simi'] = updated_simi
+
+            session['all_users'] = all_users
+            session['all_items'] = all_items   
+            session['matrix_update'] = matrix_update
+            
+            return redirect(url_for('step_update', timestamp = timestamp))
+
+        elif 'submit_button' in request.form:
+            if request.form['submit_button'] == 'Print Hello World':
+                return 'Hello World'
+
+
+            elif request.form['submit_button'] == 'Add':
+                timestamp = int(timestamp)+1
+                msg = request.form['add_text']
+                action_list = convert_to_query_add(msg, session['all_users'], session['all_items'])
+                push_command(producer, 'Add', action_list)
+                time.sleep(1.2)
+                updates = [json.loads(x.decode(encoding = 'utf8').strip()) for x in list(q.queue)]
+                q.queue.clear()
+                before_hist, updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items = update_all_latest(updates, 
+                                                                                                                        session['history'],
+                                                                                                                        session['item_inter'], 
+                                                                                                                        session['cooc'], 
+                                                                                                                        session['simi'], 
+                                                                                                                        session['all_users'], 
+                                                                                                                        session['all_items'])
+                # Update the session variable 
+                session['before_hist'] = before_hist
+                session['history'] = updated_hist
+
+                session['before_item'] = session['item_inter']
+                session['item_inter'] = updated_item
+
+                session['before_cooc'] = session['cooc']
+                session['cooc'] = updated_cooc
+
+                session['before_simi'] = session['simi']
+                session['simi'] = updated_simi
+
+                session['all_users'] = all_users
+                session['all_items'] = all_items   
+                session['matrix_update'] = matrix_update
+
+                return redirect(url_for('step_update', timestamp = timestamp))
+                 
 
     timestamp = int(timestamp)
 
-    return render_template('/step_update.html',history = session['history'],timestamp = timestamp,
-                           num_users = len(session['all_users']), 
-                           num_items = len(session['all_items']))
+
+    return render_template('/step_update.html',
+                            before_hist = session['before_hist'],
+                            before_item = session['before_item'],
+                            before_cooc = session['before_cooc'],
+                            before_simi = session['before_simi'],
+                            history = session['history'], 
+                            item_inter = session['item_inter'],
+                            cooc = session['cooc'],
+                            simi = session['simi'],
+                            matrix_update = session['matrix_update'],
+                            timestamp = timestamp,
+                            num_users = len(session['all_users']), 
+                            num_items = len(session['all_items']))
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
+

@@ -6,6 +6,12 @@
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
 
+.user-item-interactions-cell {
+    float: left;
+    width: 40px;
+    height: 40px;
+}
+
 .num-interactions-cell {
     float: left;
     width: 40px;
@@ -33,6 +39,34 @@
     <input type="text" id="msg">
     <input type="submit" value="Send">
 </form>
+
+<h3>History Matrix</h3>
+
+<div id="history_matrix">
+    <div style="clear: left;">
+      <div id="history_matrix_1_0" class="user-item-interactions-cell">0</div>
+      <div id="history_matrix_1_1" class="user-item-interactions-cell">0</div>
+      <div id="history_matrix_1_2" class="user-item-interactions-cell">0</div>
+      <div id="history_matrix_1_3" class="user-item-interactions-cell">0</div>
+    </div>
+
+    <div style="clear: left;">
+      <div id="history_matrix_2_0" class="user-item-interactions-cell">0</div>
+      <div id="history_matrix_2_1" class="user-item-interactions-cell">0</div>
+      <div id="history_matrix_2_2" class="user-item-interactions-cell">0</div>
+      <div id="history_matrix_2_3" class="user-item-interactions-cell">0</div>
+    </div>
+
+    <div style="clear: left;">
+      <div id="history_matrix_3_0" class="user-item-interactions-cell">0</div>
+      <div id="history_matrix_3_1" class="user-item-interactions-cell">0</div>
+      <div id="history_matrix_3_2" class="user-item-interactions-cell">0</div>
+      <div id="history_matrix_3_3" class="user-item-interactions-cell">0</div>
+    </div>
+
+</div>
+
+<br style="clear: left;"/>
 
 <h3>Number of interactions per item</h3>
 
@@ -137,9 +171,21 @@
 var initRequest = '{"change":"Add", "interactions":[[1,1], [1,2], [2,0], [2,1], [2,3], [3,1], [3,3]]}';
 
 var socket = new WebSocket("ws://" + window.location.host + "/ws");
+// when a message is received from the server
 socket.onmessage = function (event) {
   var messages = document.getElementById("messages");
   messages.append(event.data + "\n");
+
+  // display history matrix
+  // user starts from 1; item starts from 0
+  var initRequestDict = JSON.parse(initRequest);
+  var interactions = initRequestDict["interactions"];
+  var interactionsLength = interactions.length;
+  for (var i = 0; i < interactionsLength; i++) {
+    var user = interactions[i][0].toString();
+    var item = interactions[i][1].toString();
+    document.getElementById("history_matrix_" + user + "_" + item).innerHTML = 1;
+  }
 
   var change = JSON.parse(event.data);
 

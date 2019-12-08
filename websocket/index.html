@@ -56,6 +56,19 @@
     <input type="submit" value="Send">
 </form>
 
+<br style="clear: left;"/>
+
+<form id='add'>
+    New User Id:
+    <input type='text' id='addNewUserId'>
+    <!-- Preferred Movies (seperate by comma): 
+    <input type='text' id='addNewItemId'> -->
+    <input type='submit' value='Add'>
+    <br>
+    <h4 id='test'>Nothing</h1>
+</form>
+
+
 <h3> User Item Matrix</h3>
 
 <div id="interaction_matrix">
@@ -242,17 +255,23 @@ form.addEventListener('submit', function (event) {
   var input = document.getElementById("msg");
   socket.send(input.value);
 
+  document.getElementById("test").innerHTML = input.value;
+
   var inputDict = JSON.parse(input.value);
   var inputInfo = inputDict["interactions"];
 
   if (inputDict['change'] == 'Remove') {
       var userId = inputInfo[0][0];
-      inputInfo.forEach(element => {
-        var row = element[0];
-        var col = element[1];
-        document.getElementById("interaction_matrix_" + row + "_" + col).innerHTML = 0;
-      });
-      document.getElementById('user' + userId).hidden = true;
+      let removeUserElement = document.getElementById('user' + userId);
+      document.getElementById("interaction_matrix").removeChild(removeUserElement);
+
+    //   inputInfo.forEach(element => {
+    //     var row = element[0];
+    //     var col = element[1];
+    //     document.getElementById("interaction_matrix_" + row + "_" + col).innerHTML = 0;
+    //   });
+    //   document.getElementById('user' + userId).hidden = true;
+
   }
 
   if (inputDict['change'] == 'Add') {
@@ -280,6 +299,8 @@ form.addEventListener('submit', function (event) {
   input.value = "";
 
 });
+
+
 </script>
 </body>
 </html>

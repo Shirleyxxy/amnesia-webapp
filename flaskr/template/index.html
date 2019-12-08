@@ -33,31 +33,33 @@
 </style>
 </head>
 <body>
-<button onclick="javascript:socket.send(initRequest);">Initialize</button>
+<!-- <button id="initButton" onclick="javascript:socket.send(initRequest);">Initialize</button> -->
 
+<button id="initButton">Initialize</button>
+<p>Please input the change and click the "Submit" button. The change request will be sent to the server.</p>
 <form id="form">
-    <input type="text" id="msg">
-    <input type="submit" value="Send">
+    <input type="text" id="msg" size=80><br>
+    <input type="submit" value="Submit">
 </form>
 
 <h3>History Matrix</h3>
 
 <div id="history_matrix">
-    <div style="clear: left;">
+    <div id="history_user1" style="clear: left;">
       <div id="history_matrix_1_0" class="user-item-interactions-cell">0</div>
       <div id="history_matrix_1_1" class="user-item-interactions-cell">0</div>
       <div id="history_matrix_1_2" class="user-item-interactions-cell">0</div>
       <div id="history_matrix_1_3" class="user-item-interactions-cell">0</div>
     </div>
 
-    <div style="clear: left;">
+    <div id="history_user2" style="clear: left;">
       <div id="history_matrix_2_0" class="user-item-interactions-cell">0</div>
       <div id="history_matrix_2_1" class="user-item-interactions-cell">0</div>
       <div id="history_matrix_2_2" class="user-item-interactions-cell">0</div>
       <div id="history_matrix_2_3" class="user-item-interactions-cell">0</div>
     </div>
 
-    <div style="clear: left;">
+    <div id="history_user3" style="clear: left;">
       <div id="history_matrix_3_0" class="user-item-interactions-cell">0</div>
       <div id="history_matrix_3_1" class="user-item-interactions-cell">0</div>
       <div id="history_matrix_3_2" class="user-item-interactions-cell">0</div>
@@ -68,7 +70,7 @@
 
 <br style="clear: left;"/>
 
-<h3>Number of interactions per item</h3>
+<h3>Number of Interactions per Item</h3>
 
 <p>
     \( \mathbf{n} = \sum_i \; \mathbf{H}_i \)
@@ -85,7 +87,7 @@
 
 <br style="clear: left;"/>
 
-<h3>Item cooccurrence matrix</h3>
+<h3>Item Cooccurrence Matrix</h3>
 
 <p>
     \( \mathbf{C} = \; \mathbf{H}_i^\top \mathbf{H}_i \)
@@ -123,7 +125,7 @@
 
 <br style="clear: left;"/>
 
-<h3>Item similarity matrix</h3>
+<h3>Item Similarity Matrix</h3>
 
 <p>
     \( \mathbf{S} = \; [C_{ij} / (n_i + n_j - C_{ij})]_{ij} \)
@@ -162,7 +164,7 @@
 
 <br style="clear: left;"/>
 
-<h3>Change log</h3>
+<h3>Change Log</h3>
 
 <pre id="messages"></pre>
 
@@ -170,22 +172,29 @@
 
 var initRequest = '{"change":"Add", "interactions":[[1,1], [1,2], [2,0], [2,1], [2,3], [3,1], [3,3]]}';
 
+// function to display the initial request
+function displayInitialRequest() {
+  socket.send(initRequest);
+  var initRequestDict = JSON.parse(initRequest);
+  var initInteractions = initRequestDict["interactions"];
+  var initInteractionsLength = initInteractions.length;
+  for (var i = 0; i < initInteractionsLength; i++) {
+    var user = initInteractions[i][0].toString();
+    var item = initInteractions[i][1].toString();
+    document.getElementById("history_matrix_" + user + "_" + item).innerHTML = 1;
+  // disable the initialize button after the first click
+  document.getElementById("initButton").disabled = true;
+  }
+}
+// display the initial history matrix
+document.getElementById("initButton").onclick = displayInitialRequest;
+
 var socket = new WebSocket("ws://" + window.location.host + "/ws");
 // when a message is received from the server
 socket.onmessage = function (event) {
+
   var messages = document.getElementById("messages");
   messages.append(event.data + "\n");
-
-  // display history matrix
-  // user starts from 1; item starts from 0
-  var initRequestDict = JSON.parse(initRequest);
-  var interactions = initRequestDict["interactions"];
-  var interactionsLength = interactions.length;
-  for (var i = 0; i < interactionsLength; i++) {
-    var user = interactions[i][0].toString();
-    var item = interactions[i][1].toString();
-    document.getElementById("history_matrix_" + user + "_" + item).innerHTML = 1;
-  }
 
   var change = JSON.parse(event.data);
 
@@ -212,13 +221,53 @@ socket.onmessage = function (event) {
   }
 
 };
+
+// var removeRequest = '{"change":"Remove", "interactions":[[1,1], [1,2]]}';
+
 var form = document.getElementById("form");
 form.addEventListener('submit', function (event) {
   event.preventDefault();
   var input = document.getElementById("msg");
   socket.send(input.value);
+
+  var inputDict = JSON.parse(input.value);
+  var interactions = inputDict["interactions"];
+
+  if (inputDict['change'] == 'Remove') {
+      var user = interactions[0][0];
+      interactions.forEach(element => {
+        var row = element[0];
+        var col = element[1];
+        document.getElementById("history_matrix_" + row + "_" + col).innerHTML = 0;
+      });
+      // hide the row for the removed user
+      document.getElementById('history_user' + user).hidden = true;
+  }
+
+  if (inputDict['change'] == 'Add') {
+      var userId = interactions[0][0];
+      let newUser = document.createElement("div");
+      newUser.id = "history_user" + userId;
+      newUser.style = "clear: left;";
+      document.getElementById("history_matrix").appendChild(newUser);
+      for (var i = 0; i < 4; i++) {
+        let newUserItem = document.createElement("div");
+        newUserItem.id = "history_matrix_" + userId + "_" + i;
+        newUserItem.className = "user-item-interactions-cell";
+        newUserItem.innerHTML = 0;
+        document.getElementById("history_user" + userId).appendChild(newUserItem);
+      }
+      interactions.forEach(element => {
+        var row = element[0];
+        var col = element[1];
+        document.getElementById("history_matrix_" + row + "_" + col).innerHTML = 1;
+      });
+  }
+
   input.value = "";
+
 });
+
 </script>
 </body>
 </html>

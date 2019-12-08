@@ -21,6 +21,7 @@
         <form method="POST">
             <input type="submit" name = "submit_button" value= "Next Step!">
             <input type="submit" name="submit_button" value='Print Hello World'>
+            <input type="text" name="add_name">
             <input type="text" name="add_text">
             <input type="submit" name="submit_button" value="Add" id="add_button">
 
@@ -37,14 +38,14 @@
                             {% for movie in range(num_items) %}
                                 <th>Movie {{ movie }}</th>
                             {% endfor %}
-                            <th>Action</th>
+                            <th> Action </th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for i in range(num_users) %}
                             {% if matrix_update[i] == 0 %}
                                 <tr class="history disappear">
-                                    <td><div>User{{i}}</div></td>
+                                    <td><div>{{name_list[i]}}</div></td>
                                         {% for j in range(num_items) %}
                                             <td>
                                                 {% if before_hist[i][j] != history[i][j] %}
@@ -56,12 +57,12 @@
                                             </td>
                                         {% endfor %}
                                         <form method="POST">
-                                            <td><div class="disappear"><input type="submit" name="delete_button" value="Delete User {{i}}"></div></td>
+                                            <td class="d_button"><div class="disappear"><input type="submit" name="delete_button" value="Delete {{name_list[i]}}"></div></td>
                                         </form>
                                 </tr>
                             {% elif matrix_update[i] == -1 %}
                                 <tr class="history noshow">
-                                    <td><div>User{{i}}</div></td>
+                                    <td><div>{{name_list[i]}}</div></td>
                                         {% for j in range(num_items) %}
                                             <td>
                                                 {% if before_hist[i][j] != history[i][j] %}
@@ -73,12 +74,12 @@
                                             </td>
                                         {% endfor %}
                                         <form method="POST">
-                                            <td><div class="noshow"><input type="submit" name="delete_button" value="Delete User {{i}}"></div></td>
+                                            <td class="d_button"><div class="noshow"><input type="submit" name="delete_button" value="Delete {{name_list[i]}}"></div></td>
                                         </form>
                                 </tr>
                             {% else %}
                                 <tr class="history">
-                                    <td><div>User{{i}}</div></td>
+                                    <td><div>{{name_list[i]}}</div></td>
                                         {% for j in range(num_items) %}
                                             <td>
                                                 {% if before_hist[i][j] != history[i][j] %}
@@ -90,7 +91,7 @@
                                             </td>
                                         {% endfor %}
                                         <form method="POST">
-                                            <td><div><input type="submit" name="delete_button" value="Delete User {{i}}"></div></td>
+                                            <td class="d_button"><div><input type="submit" name="delete_button" value="Delete {{name_list[i]}}"></div></td>
                                         </form>
                                 </tr>
                             {% endif %}

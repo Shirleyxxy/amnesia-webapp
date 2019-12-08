@@ -64,7 +64,7 @@ body{
   
   table {
     text-align: center;
-    table-layout: fixed;
+    table-layout: auto;
     width: 500px;
     background: beige;
     margin: 20px auto;

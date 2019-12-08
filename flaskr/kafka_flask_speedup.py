@@ -24,6 +24,7 @@ import json
 import shlex
 import sys
 from kafka import KafkaProducer
+import operator
 
 KAFKA_PATH = os.getcwd()
 KAFKA_HOSTS = ['localhost:9092']
@@ -63,6 +64,7 @@ def index():
     q.queue.clear()
 
     history, item_inter, cooc, simi, all_users, all_items = read_init(curr_list)
+    name_dict = {'Homer': 0, 'Marge':1, 'Bart':2, 'Lisa':3}
 
     # Store for continuous update
 
@@ -78,7 +80,7 @@ def index():
     session['all_users'] = all_users
     session['all_items'] = all_items
     session['matrix_update'] = []
-
+    session['name_dict'] = name_dict
     timestamp = 0
     return redirect(url_for('step_update', timestamp = timestamp))
 
@@ -86,7 +88,10 @@ def index():
 def step_update(timestamp):
     if request.method == 'POST':
         if 'delete_button' in request.form:
-            to_be_delete_user = int(request.form['delete_button'].split()[-1])
+            name_dict = session['name_dict']
+   
+            to_be_delete_user_name = request.form['delete_button'].split()[-1]
+            to_be_delete_user = int(name_dict[to_be_delete_user_name])
 
             timestamp = int(timestamp)+1
             action_list = convert_to_query_delete(to_be_delete_user, session['history'], session['all_users'])
@@ -128,6 +133,7 @@ def step_update(timestamp):
             elif request.form['submit_button'] == 'Add':
                 timestamp = int(timestamp)+1
                 msg = request.form['add_text']
+                new_name = request.form['add_name']
                 action_list = convert_to_query_add(msg, session['all_users'], session['all_items'])
                 push_command(producer, 'Add', action_list)
                 time.sleep(1.2)
@@ -140,6 +146,8 @@ def step_update(timestamp):
                                                                                                                         session['simi'], 
                                                                                                                         session['all_users'], 
                                                                                                                         session['all_items'])
+                # Only when adding will update name_dict
+                session['name_dict'][new_name] = max(all_users) + 1
                 # Update the session variable 
                 session['before_hist'] = before_hist
                 session['history'] = updated_hist
@@ -161,6 +169,7 @@ def step_update(timestamp):
                  
 
     timestamp = int(timestamp)
+    name_list = [t[0] for t in sorted(session['name_dict'].items(), key = operator.itemgetter(1))]
 
 
     return render_template('/step_update.html',
@@ -174,6 +183,7 @@ def step_update(timestamp):
                             simi = session['simi'],
                             matrix_update = session['matrix_update'],
                             timestamp = timestamp,
+                            name_list = name_list,
                             num_users = len(session['all_users']), 
                             num_items = len(session['all_items']))
 

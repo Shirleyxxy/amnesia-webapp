@@ -14,8 +14,11 @@ from flask import Flask, render_template, redirect, url_for, request, session
 from utils import *
 import os
 import time
+import sys
 
-kafka_path = '/Users/Hengyu/Desktop/Git/deml-project-1'
+# kafka_path = '/Users/Hengyu/Desktop/Git/deml-project-1'
+# should change based on the amnesia-demo file location
+kafka_path = sys.argv[1]
 RESULT_FILE = kafka_path + '/amnesia_result.json'
 
 # Set up kafka environment

@@ -27,7 +27,8 @@ from flaskr.utils import *
 
 KAFKA_HOSTS = ['localhost:9092']
 KAFKA_VERSION = (0, 10)
-kafka_path = '/Users/Hengyu/Desktop/Git/deml-project-1'
+# kafka_path = '/Users/Hengyu/Desktop/Git/deml-project-1'
+kafka_path = os.getcwd()
 
 # def set_up_kafka(kafka_path):
 #     CURR_CWD = os.getcwd()

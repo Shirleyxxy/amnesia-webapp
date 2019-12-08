@@ -32,6 +32,21 @@
 
 </style>
 </head>
+
+<header>
+    <nav>
+        <ul>
+            <li><a href="https://ssc.io/">Home</a></li>
+            <li><a href="https://github.com/schelterlabs/projects-amnesia">Github</a></li>
+            <li id='title'>Project Amnesia Demo</li>
+            <li><a href="https://drive.google.com/file/d/1FU4svEaLb6a5v8CI4tl4YQpv4Cr4DUei/view">Slides</a></li>
+            <li><a href="https://drive.google.com/file/d/17M6k_b94stLyPB6LHOq9td2pRDAmREr8/view">Paper</a></li>
+        </ul>
+    </nav>
+</header>
+
+
+
 <body>
 <!-- <button id='initialize' onclick="javascript:socket.send(initRequest);">Initialize</button> -->
 <button id='initialize'>Initialize</button>
@@ -238,6 +253,28 @@ form.addEventListener('submit', function (event) {
         document.getElementById("interaction_matrix_" + row + "_" + col).innerHTML = 0;
       });
       document.getElementById('user' + userId).hidden = true;
+  }
+
+  if (inputDict['change'] == 'Add') {
+      var userId = inputInfo[0][0];
+      let newUser = document.createElement("div");
+      newUser.id = "user" + userId;
+      newUser.style = "clear: left;";
+      document.getElementById("interaction_matrix").appendChild(newUser);
+
+      for (i = 0; i < 4; i++){
+        let newUserItem = document.createElement("div");
+        newUserItem.id = "interaction_matrix_" + userId + "_" + i;
+        newUserItem.className = "user-item-interactions";
+        newUserItem.innerHTML = 0;
+        document.getElementById("user" + userId).appendChild(newUserItem);
+      }
+
+      inputInfo.forEach(element => {
+        var row = element[0];
+        var col = element[1];
+        document.getElementById("interaction_matrix_" + row + "_" + col).innerHTML = 1;
+      });
   }
 
   input.value = "";

@@ -6,6 +6,19 @@
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 <style>
+body{
+    background-color:#AEC6CF;
+    color: #444;
+    font-family: Arial;
+    margin: 0px;
+    padding:0px;
+}
+
+
+div{
+    color: #444,
+}
+
 .user-item-interactions {
     float: left;
     width: 40px;
@@ -48,25 +61,36 @@
 
 
 <body>
-<!-- <button id='initialize' onclick="javascript:socket.send(initRequest);">Initialize</button> -->
 <button id='initialize'>Initialize</button>
 
 <form id="form">
+    Full Request:
     <input type="text" id="msg" size=80>
     <input type="submit" value="Send">
 </form>
 
 <br style="clear: left;"/>
 
-<form id='add'>
-    New User Id:
-    <input type='text' id='addNewUserId'>
-    <!-- Preferred Movies (seperate by comma): 
-    <input type='text' id='addNewItemId'> -->
-    <input type='submit' value='Add'>
+<form id="addForm">
+    New User ID: <input type='text' id='addNewUserId'><br>
+    Movie ID(s): <input type='text' id='addNewItemId'>
     <br>
-    <h4 id='test'>Nothing</h1>
+    <input type="submit" value="Add">
 </form>
+
+<br style="clear: left;"/>
+
+<form id="removeForm">
+    User ID to Remove: <input type='text' id='removeUserId'><br>
+    <input type="submit" value="Remove">
+</form>
+
+
+<br style="clear: left;"/>
+
+<h4 id="test">Nothing</h4>
+
+<br style="clear: left;"/>
 
 
 <h3> User Item Matrix</h3>
@@ -201,7 +225,7 @@ var initRequest = '{"change":"Add", "interactions":[[1,1], [1,2], [2,0], [2,1], 
 document.getElementById("initialize").onclick = userItemInitialPrint;
 
 function userItemInitialPrint() {
-    javascript:socket.send(initRequest);
+    socket.send(initRequest);
 
     var userItemMat = JSON.parse(initRequest);
     var userItemInfo = userItemMat["interactions"];
@@ -246,8 +270,6 @@ socket.onmessage = function (event) {
   }
 
 };
-
-// var removeRequest = '{"change":"Remove", "interactions":[[1,1], [1,2]]}';
 
 var form = document.getElementById("form");
 form.addEventListener('submit', function (event) {
@@ -298,6 +320,71 @@ form.addEventListener('submit', function (event) {
 
   input.value = "";
 
+});
+
+var addForm = document.getElementById("addForm");
+addForm.addEventListener('submit', function (event) {
+  event.preventDefault();
+  var input = document.getElementById("msg");
+  var newUserId = document.getElementById("addNewUserId").value;
+  var newItemId = document.getElementById("addNewItemId").value;
+  ItemArray = newItemId.split(',').map(Number);
+  var interactionList = [];
+  for (i = 0; i < ItemArray.length; i++){
+    interactionList.push([Number(newUserId), ItemArray[i]]);
+  }
+
+  var addRequest = {"change": "Add"};
+  addRequest["interactions"] = interactionList;
+
+  document.getElementById("test").innerHTML = JSON.stringify(addRequest);
+
+  socket.send(JSON.stringify(addRequest));
+  var inputDict = JSON.parse(JSON.stringify(addRequest));
+
+  var inputInfo = inputDict["interactions"];
+
+  var userId = inputInfo[0][0];
+  let newUser = document.createElement("div");
+  newUser.id = "user" + userId;
+  newUser.style = "clear: left;";
+  document.getElementById("interaction_matrix").appendChild(newUser);
+
+  for (i = 0; i < 4; i++){
+    let newUserItem = document.createElement("div");
+    newUserItem.id = "interaction_matrix_" + userId + "_" + i;
+    newUserItem.className = "user-item-interactions";
+    newUserItem.innerHTML = 0;
+    document.getElementById("user" + userId).appendChild(newUserItem);
+   }
+   
+  inputInfo.forEach(element => {
+    var row = element[0];
+    var col = element[1];
+    document.getElementById("interaction_matrix_" + row + "_" + col).innerHTML = 1;
+  });
+});
+
+var removeForm = document.getElementById("removeForm");
+removeForm.addEventListener('submit', function (event) {
+  event.preventDefault();
+  var input = document.getElementById("msg");
+  var removeUserId = document.getElementById("removeUserId").value;
+  var interactionList = [];
+
+  for (i = 0; i < 4; i++){
+    if (document.getElementById("interaction_matrix_" + removeUserId +"_" + i).innerHTML == '1'){
+        interactionList.push([Number(removeUserId), i]);
+    }
+  }
+
+  var removeRequest = {"change": "Remove"};
+  removeRequest["interactions"] = interactionList;
+
+  socket.send(JSON.stringify(removeRequest));
+  
+  let removeUserElement = document.getElementById('user' + removeUserId);
+  document.getElementById("interaction_matrix").removeChild(removeUserElement);
 });
 
 

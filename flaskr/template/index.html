@@ -37,10 +37,22 @@
 
 <button id="initButton">Initialize</button>
 <p>Please input the change and click the "Submit" button. The change request will be sent to the server.</p>
+
 <form id="form">
     <input type="text" id="msg" size=80><br>
     <input type="submit" value="Submit">
 </form>
+
+<br style="clear: left;"/>
+
+<form id="remove_form">
+    User Id to Remove: <input type="text" id="user_to_remove"><br>
+    <input type="submit" value="Remove">
+</form>
+
+<br style="clear: left;"/>
+
+<h3 id="test">Test Cell</h3>
 
 <h3>History Matrix</h3>
 
@@ -174,7 +186,10 @@ var initRequest = '{"change":"Add", "interactions":[[1,1], [1,2], [2,0], [2,1], 
 
 // function to display the initial request
 function displayInitialRequest() {
+  // enqueue the message to be transmitted to the model
+  // display interactions per item, cooccurrence matrix, similarity matrix
   socket.send(initRequest);
+  // parse the message to display the history matrix
   var initRequestDict = JSON.parse(initRequest);
   var initInteractions = initRequestDict["interactions"];
   var initInteractionsLength = initInteractions.length;
@@ -186,9 +201,10 @@ function displayInitialRequest() {
   document.getElementById("initButton").disabled = true;
   }
 }
-// display the initial history matrix
+// trigger the function to display the initial request
 document.getElementById("initButton").onclick = displayInitialRequest;
 
+// web socket
 var socket = new WebSocket("ws://" + window.location.host + "/ws");
 // when a message is received from the server
 socket.onmessage = function (event) {
@@ -224,49 +240,79 @@ socket.onmessage = function (event) {
 
 // var removeRequest = '{"change":"Remove", "interactions":[[1,1], [1,2]]}';
 
+// display the changes from a request message
 var form = document.getElementById("form");
 form.addEventListener('submit', function (event) {
   event.preventDefault();
   var input = document.getElementById("msg");
+  // send the message from the browser to the model to reflect the changes
   socket.send(input.value);
-
+  // parse the message to reflect the change of the history matrix
   var inputDict = JSON.parse(input.value);
-  var interactions = inputDict["interactions"];
+  var inputInteractions = inputDict["interactions"];
 
+  // parse REMOVE message
   if (inputDict['change'] == 'Remove') {
-      var user = interactions[0][0];
-      interactions.forEach(element => {
-        var row = element[0];
-        var col = element[1];
-        document.getElementById("history_matrix_" + row + "_" + col).innerHTML = 0;
-      });
-      // hide the row for the removed user
-      document.getElementById('history_user' + user).hidden = true;
+    var removeUserId = inputInteractions[0][0];
+    let userToRemove = document.getElementById('history_user' + removeUserId);
+    document.getElementById("history_matrix").removeChild(userToRemove);
   }
 
+  // parse ADD message
   if (inputDict['change'] == 'Add') {
-      var userId = interactions[0][0];
-      let newUser = document.createElement("div");
-      newUser.id = "history_user" + userId;
-      newUser.style = "clear: left;";
-      document.getElementById("history_matrix").appendChild(newUser);
-      for (var i = 0; i < 4; i++) {
-        let newUserItem = document.createElement("div");
-        newUserItem.id = "history_matrix_" + userId + "_" + i;
-        newUserItem.className = "user-item-interactions-cell";
-        newUserItem.innerHTML = 0;
-        document.getElementById("history_user" + userId).appendChild(newUserItem);
-      }
-      interactions.forEach(element => {
+    var addUserId = inputInteractions[0][0];
+    // create a new element for the new user
+    let userToAdd = document.createElement("div");
+    userToAdd.id = "history_user" + addUserId;
+    userToAdd.style = "clear: left;";
+    document.getElementById("history_matrix").appendChild(userToAdd);
+
+    // create the four user-item elements for the new user element
+    for (var i = 0; i < 4; i++) {
+      let newUserItem = document.createElement("div");
+      newUserItem.id = "history_matrix_" + addUserId + "_" + i;
+      newUserItem.className = "user-item-interactions-cell";
+      newUserItem.innerHTML = 0;
+      document.getElementById("history_user" + addUserId).appendChild(newUserItem);
+    }
+
+    inputInteractions.forEach(element => {
         var row = element[0];
         var col = element[1];
         document.getElementById("history_matrix_" + row + "_" + col).innerHTML = 1;
-      });
+    });
   }
 
+  // reset to an empty message
   input.value = "";
 
 });
+
+// remove button
+var removeForm = document.getElementById("remove_form");
+
+removeForm.addEventListener('submit', function (event) {
+  event.preventDefault();
+  // remove the user in the history matrix
+  var removeUserId = document.getElementById("user_to_remove").value;
+  let userToRemove = document.getElementById('history_user' + removeUserId);
+  document.getElementById("history_matrix").removeChild(userToRemove);
+
+  // create the REMOVE message for the web socket
+  var interactions = [];
+  for (var i = 0; i < 4; i++) {
+    if (document.getElementById('history_matrix_' + removeUserId + '_' + i).innerHTML == "1") {
+      interactions.push([Number(removeUserId), i]);
+    }
+  }
+
+  var removeMessageDict = {"change":"Remove"};
+  removeMessageDict["interactions"] = interactions;
+  var removeMessage = JSON.stringify(removeMessageDict);
+  socket.send(removeMessage);
+
+});
+
 
 </script>
 </body>

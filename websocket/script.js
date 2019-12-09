@@ -3,23 +3,26 @@ var initRequest = '{"change":"Add", "interactions":[[1,1], [1,2], [2,0], [2,1], 
 document.getElementById("initialize").onclick = userItemInitialPrint;
 
 function userItemInitialPrint() {
-    socket.send(initRequest);
+  document.getElementById("requestInfo").innerHTML = initRequest;
+  socket.send(initRequest);
 
-    var userItemMat = JSON.parse(initRequest);
-    var userItemInfo = userItemMat["interactions"];
+  var userItemMat = JSON.parse(initRequest);
+  var userItemInfo = userItemMat["interactions"];
     
-    userItemInfo.forEach(element => {
-        var row = element[0];
-        var col = element[1];
-        document.getElementById("interaction_matrix_" + row + "_" + col).innerHTML = 1;    
-    });
+  userItemInfo.forEach(element => {
+    var row = element[0];
+    var col = element[1];
+    document.getElementById("interaction_matrix_" + row + "_" + col).innerHTML = 1;    
+  });
 
-    document.getElementById("initialize").disabled=true;
+  document.getElementById("initialize").disabled=true;
 }
 
 var socket = new WebSocket("ws://" + window.location.host + "/ws");
 socket.onmessage = function (event) {
-  
+  var requestInfo = document.getElementById("requestInfo").innerHTML;
+  var action = JSON.parse(requestInfo);
+
   var messages = document.getElementById("messages");
   messages.append(event.data + "\n");
 
@@ -30,6 +33,12 @@ socket.onmessage = function (event) {
     var count = change['count'];
     document.getElementById("interactions_per_item_" + item).innerHTML = count;
   }
+
+  if (action['change'] == 'Remove' && change['data'] == 'item_interactions_n' && change['change'] == -1 && change['count'] == 1) {
+    var item = change['item'];
+    document.getElementById("interactions_per_item_" + item).innerHTML = 0;
+  }
+
 
   if (change['data'] == 'cooccurrences_c' && change['change'] == 1) {
     var item_a = change['item_a'];
@@ -55,7 +64,7 @@ form.addEventListener('submit', function (event) {
   var input = document.getElementById("msg");
   socket.send(input.value);
 
-//   document.getElementById("test").innerHTML = input.value;
+  document.getElementById("requestInfo").innerHTML = input.value;
 
   var inputDict = JSON.parse(input.value);
   var inputInfo = inputDict["interactions"];
@@ -64,14 +73,6 @@ form.addEventListener('submit', function (event) {
       var userId = inputInfo[0][0];
       let removeUserElement = document.getElementById('user' + userId);
       document.getElementById("interaction_matrix").removeChild(removeUserElement);
-
-    //   inputInfo.forEach(element => {
-    //     var row = element[0];
-    //     var col = element[1];
-    //     document.getElementById("interaction_matrix_" + row + "_" + col).innerHTML = 0;
-    //   });
-    //   document.getElementById('user' + userId).hidden = true;
-
   }
 
   if (inputDict['change'] == 'Add') {
@@ -114,7 +115,7 @@ addForm.addEventListener('submit', function (event) {
   var addRequest = {"change": "Add"};
   addRequest["interactions"] = interactionList;
 
-  document.getElementById("test").innerHTML = JSON.stringify(addRequest);
+  document.getElementById("requestInfo").innerHTML = JSON.stringify(addRequest);
 
   socket.send(JSON.stringify(addRequest));
   var inputDict = JSON.parse(JSON.stringify(addRequest));
@@ -140,9 +141,6 @@ addForm.addEventListener('submit', function (event) {
     var col = element[1];
     document.getElementById("interaction_matrix_" + row + "_" + col).innerHTML = 1;
   });
-
-  newUserId = "";
-  newItemId = "";
 });
 
 var removeForm = document.getElementById("removeForm");
@@ -159,12 +157,11 @@ removeForm.addEventListener('submit', function (event) {
 
   var removeRequest = {"change": "Remove"};
   removeRequest["interactions"] = interactionList;
+  document.getElementById("requestInfo").innerHTML = JSON.stringify(removeRequest);
 
   socket.send(JSON.stringify(removeRequest));
   
   let removeUserElement = document.getElementById('user' + removeUserId);
   document.getElementById("interaction_matrix").removeChild(removeUserElement);
-
-  removeUserId = "";
 
 });

@@ -72,18 +72,22 @@ form.addEventListener('submit', function (event) {
   if (inputDict['change'] == 'Remove') {
       var userId = inputInfo[0][0];
       let removeUserElement = document.getElementById('user' + userId);
-      document.getElementById("interaction_matrix").removeChild(removeUserElement);
-  }
+      removeUserElement.parentElement.removeChild(removeUserElement);
+    }
 
   if (inputDict['change'] == 'Add') {
       var userId = inputInfo[0][0];
-      let newUser = document.createElement("div");
+      let newUser = document.createElement("tr");
       newUser.id = "user" + userId;
-      newUser.style = "clear: left;";
-      document.getElementById("interaction_matrix").appendChild(newUser);
+      document.getElementById("user-item-value").appendChild(newUser);
+
+      let newUserTh = document.createElement("th");
+      newUserTh.innerHTML = "User" + userId;
+      newUserTh.scope = 'row';
+      document.getElementById("user" + userId).appendChild(newUserTh);
 
       for (i = 0; i < 4; i++){
-        let newUserItem = document.createElement("div");
+        let newUserItem = document.createElement("td");
         newUserItem.id = "interaction_matrix_" + userId + "_" + i;
         newUserItem.className = "user-item-interactions";
         newUserItem.innerHTML = 0;
@@ -118,18 +122,22 @@ addForm.addEventListener('submit', function (event) {
   document.getElementById("requestInfo").innerHTML = JSON.stringify(addRequest);
 
   socket.send(JSON.stringify(addRequest));
-  var inputDict = JSON.parse(JSON.stringify(addRequest));
 
+  var inputDict = JSON.parse(JSON.stringify(addRequest));
   var inputInfo = inputDict["interactions"];
 
   var userId = inputInfo[0][0];
-  let newUser = document.createElement("div");
+  let newUser = document.createElement("tr");
   newUser.id = "user" + userId;
-  newUser.style = "clear: left;";
-  document.getElementById("interaction_matrix").appendChild(newUser);
+  document.getElementById("user-item-value").appendChild(newUser);
+
+  let newUserTh = document.createElement("th");
+  newUserTh.innerHTML = "User" + userId;
+  newUserTh.scope = 'row';
+  document.getElementById("user" + userId).appendChild(newUserTh);
 
   for (i = 0; i < 4; i++){
-    let newUserItem = document.createElement("div");
+    let newUserItem = document.createElement("td");
     newUserItem.id = "interaction_matrix_" + userId + "_" + i;
     newUserItem.className = "user-item-interactions";
     newUserItem.innerHTML = 0;
@@ -162,6 +170,6 @@ removeForm.addEventListener('submit', function (event) {
   socket.send(JSON.stringify(removeRequest));
   
   let removeUserElement = document.getElementById('user' + removeUserId);
-  document.getElementById("interaction_matrix").removeChild(removeUserElement);
+  removeUserElement.parentElement.removeChild(removeUserElement);
 
 });

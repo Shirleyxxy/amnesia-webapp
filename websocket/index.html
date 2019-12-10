@@ -8,160 +8,238 @@
 
 </head>
 
-<body>
-<button id='initialize'>Initialize</button>
+<body class="body">
 
+<h1 class="heading">Amnesia Demo</h1>
+<p><em>Amnesia</em> enables users to decrementally update trained machine learning models in order to
+efficiently and reliably “forget” the sensitive personal data from applications that contain ML models.
+Our web app serves to demonstrate the corresponding decremental changes of history matrix, total item interactions, cooccurrence matrix,
+and similarity matrix for an item-based collaborative filtering model after adding or removing the data of a particular user.</p>
+
+<div class="wrapper">
+<button id='initialize'>Initialize</button>
+</div>
+
+<div class="container">
 <form id="form">
-    Full Request:
-    <input type="text" id="msg" size=80>
-    <input type="submit" value="Send">
+    <input type="text" id="msg" placeholder=" Please write your request here..."size=80>
+    <input type="submit" id="submitButton" value="Submit">
 </form>
 
-<br style="clear: left;"/>
+<br/>
 
 <form id="addForm">
-    New User ID: <input type='text' id='addNewUserId'><br>
-    Movie ID(s): <input type='text' id='addNewItemId'>
-    <br>
-    <input type="submit" value="Add">
+    <div>
+    <input type="text" id="addNewUserId" placeholder=" New User ID">
+    </div>
+    <div>
+    <input type="text" id="addNewItemId" placeholder=" Movie ID(s)">
+    </div>
+    <div>
+    <input type="submit" id="addButton" value="Add">
+    </div>
 </form>
 
-<br style="clear: left;"/>
+<br/>
 
 <form id="removeForm">
-    User ID to Remove: <input type='text' id='removeUserId'><br>
-    <input type="submit" value="Remove">
+    <input type='text' id='removeUserId' placeholder=" User ID to Remove"><br>
+    <input type="submit" id="removeButton" value="Remove">
 </form>
 
-
-<br style="clear: left;"/>
+<br/>
 
 <h4>Request Infomation: </h4>
 <p id="requestInfo">Request Information To Display</p>
 
-<br style="clear: left;"/>
-
-
-<h3> User Item Matrix</h3>
-
-<div id="interaction_matrix">
-    <div id="user1" style="clear: left;">
-        <div id="interaction_matrix_1_0" class="user-item-interactions">0</div>
-        <div id="interaction_matrix_1_1" class="user-item-interactions">0</div>
-        <div id="interaction_matrix_1_2" class="user-item-interactions">0</div>
-        <div id="interaction_matrix_1_3" class="user-item-interactions">0</div>
-    </div>
-
-    <div id="user2" style="clear: left;">
-        <div id="interaction_matrix_2_0" class="user-item-interactions">0</div>
-        <div id="interaction_matrix_2_1" class="user-item-interactions">0</div>
-        <div id="interaction_matrix_2_2" class="user-item-interactions">0</div>
-        <div id="interaction_matrix_2_3" class="user-item-interactions">0</div>
-    </div>
-
-    <div id="user3" style="clear: left;">
-        <div id="interaction_matrix_3_0" class="user-item-interactions">0</div>
-        <div id="interaction_matrix_3_1" class="user-item-interactions">0</div>
-        <div id="interaction_matrix_3_2" class="user-item-interactions">0</div>
-        <div id="interaction_matrix_3_3" class="user-item-interactions">0</div>
-    </div>
 </div>
 
-<br style="clear: left;"/>
+<br/>
 
-<h3>Number of interactions per item</h3>
+<div id="images_group">
+    <img src="images/Frozen.jpg" class="movie-image">
+    <img src="images/IT.jpg" class="movie-image">
+    <img src="images/Joker.jpg" class="movie-image">
+    <img src="images/Midway.jpg" class="movie-image">
+</div>
 
-<p>
+<br/>
+
+<div class="tables">
+
+<div class='matrix'>
+<table id="interaction_matrix">
+    <caption>User Item Matrix</caption>
+    <thead id='table-header'>
+        <th scope="col">Movies</th>
+        <th scope="col">Frozen</th>
+        <th scope="col">IT</th>
+        <th scope="col">Joker</th>
+        <th scope="col">Midway</th>
+    </thead>
+    <tbody id="user-item-value">
+        <tr id="user1">
+            <th scope='row'>User1</th>
+            <td id="interaction_matrix_1_0" class="user-item-interactions">0</td>
+            <td id="interaction_matrix_1_1" class="user-item-interactions">0</td>
+            <td id="interaction_matrix_1_2" class="user-item-interactions">0</td>
+            <td id="interaction_matrix_1_3" class="user-item-interactions">0</td>
+        </tr>
+        <tr id="user2">
+            <th scope='row'>User2</th>
+            <td id="interaction_matrix_2_0" class="user-item-interactions">0</td>
+            <td id="interaction_matrix_2_1" class="user-item-interactions">0</td>
+            <td id="interaction_matrix_2_2" class="user-item-interactions">0</td>
+            <td id="interaction_matrix_2_3" class="user-item-interactions">0</td>
+        </tr>
+        <tr id="user3">
+            <th scope='row'>User3</th>
+            <td id="interaction_matrix_3_0" class="user-item-interactions">0</td>
+            <td id="interaction_matrix_3_1" class="user-item-interactions">0</td>
+            <td id="interaction_matrix_3_2" class="user-item-interactions">0</td>
+            <td id="interaction_matrix_3_3" class="user-item-interactions">0</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
+<br/>
+
+<div class='caption'>Number of interactions per item</div>
+
+<p class="equation">
     \( \mathbf{n} = \sum_i \; \mathbf{H}_i \)
 </p>
 
-<div id="interactions_per_item">
-    <div style="clear: left;">
-        <div id="interactions_per_item_0" class="num-interactions-cell">0</div>
-        <div id="interactions_per_item_1" class="num-interactions-cell">0</div>
-        <div id="interactions_per_item_2" class="num-interactions-cell">0</div>
-        <div id="interactions_per_item_3" class="num-interactions-cell">0</div>
-    </div>
+<div class='matrix'>
+
+<table id="interactions_per_item">
+    <thead>
+        <th scope="col">Frozen</th>
+        <th scope="col">IT</th>
+        <th scope="col">Joker</th>
+        <th scope="col">Midway</th>
+    </thead>
+    <tbody>
+        <td id="interactions_per_item_0" class="num-interactions-cell">0</td>
+        <td id="interactions_per_item_1" class="num-interactions-cell">0</td>
+        <td id="interactions_per_item_2" class="num-interactions-cell">0</td>
+        <td id="interactions_per_item_3" class="num-interactions-cell">0</td>
+    </tbody>
+</table>
 </div>
 
-<br style="clear: left;"/>
+<br/>
 
-<h3>Item cooccurrence matrix</h3>
+<div class='caption'>Item cooccurrence matrix</div>
 
-<p>
+<p class="equation">
     \( \mathbf{C} = \; \mathbf{H}_i^\top \mathbf{H}_i \)
 </p>
 
-<div id="cooccurrences">
-    <div style="clear: left;">
-        <div id="cooccurrences_0_0" class="cooccurrences-cell">-</div>
-        <div id="cooccurrences_0_1" class="cooccurrences-cell">0</div>
-        <div id="cooccurrences_0_2" class="cooccurrences-cell">0</div>
-        <div id="cooccurrences_0_3" class="cooccurrences-cell">0</div>
-    </div>
+<div class='matrix'>
 
-    <div style="clear: left;">
-        <div id="cooccurrences_1_0" class="cooccurrences-cell">0</div>
-        <div id="cooccurrences_1_1" class="cooccurrences-cell">-</div>
-        <div id="cooccurrences_1_2" class="cooccurrences-cell">0</div>
-        <div id="cooccurrences_1_3" class="cooccurrences-cell">0</div>
-    </div>
+<table id="cooccurrences">
+    <thead>
+        <th scope="col"></th>
+        <th scope="col">Frozen</th>
+        <th scope="col">IT</th>
+        <th scope="col">Joker</th>
+        <th scope="col">Midway</th>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">Frozen</th>
+            <td id="cooccurrences_0_0" class="cooccurrences-cell">-</td>
+            <td id="cooccurrences_0_1" class="cooccurrences-cell">0</td>
+            <td id="cooccurrences_0_2" class="cooccurrences-cell">0</td>
+            <td id="cooccurrences_0_3" class="cooccurrences-cell">0</td>
+        </tr>
 
-    <div style="clear: left;">
-        <div id="cooccurrences_2_0" class="cooccurrences-cell">0</div>
-        <div id="cooccurrences_2_1" class="cooccurrences-cell">0</div>
-        <div id="cooccurrences_2_2" class="cooccurrences-cell">-</div>
-        <div id="cooccurrences_2_3" class="cooccurrences-cell">0</div>
-    </div>
+        <tr>
+            <th scope="row">IT</th>
+            <td id="cooccurrences_1_0" class="cooccurrences-cell">0</td>
+            <td id="cooccurrences_1_1" class="cooccurrences-cell">-</td>
+            <td id="cooccurrences_1_2" class="cooccurrences-cell">0</td>
+            <td id="cooccurrences_1_3" class="cooccurrences-cell">0</td>
+        </tr>
 
-    <div style="clear: left;">
-        <div id="cooccurrences_3_0" class="cooccurrences-cell">0</div>
-        <div id="cooccurrences_3_1" class="cooccurrences-cell">0</div>
-        <div id="cooccurrences_3_2" class="cooccurrences-cell">0</div>
-        <div id="cooccurrences_3_3" class="cooccurrences-cell">-</div>
-    </div>
+        <tr>
+            <th scope="row">Joker</th>
+            <td id="cooccurrences_2_0" class="cooccurrences-cell">0</div>
+            <td id="cooccurrences_2_1" class="cooccurrences-cell">0</div>
+            <td id="cooccurrences_2_2" class="cooccurrences-cell">-</div>
+            <td id="cooccurrences_2_3" class="cooccurrences-cell">0</div>
+        </tr>
+
+        <tr>
+            <th scope="row">Midway</th>
+            <td id="cooccurrences_3_0" class="cooccurrences-cell">0</td>
+            <td id="cooccurrences_3_1" class="cooccurrences-cell">0</td>
+            <td id="cooccurrences_3_2" class="cooccurrences-cell">0</td>
+            <td id="cooccurrences_3_3" class="cooccurrences-cell">-</td>
+        </tr>
+    </tbody>
+</table>
 </div>
 
-<br style="clear: left;"/>
 
-<h3>Item similarity matrix</h3>
+<br/>
 
-<p>
+<div class = 'caption'>Item similarity matrix</div>
+
+<p class="equation">
     \( \mathbf{S} = \; [C_{ij} / (n_i + n_j - C_{ij})]_{ij} \)
 </p>
 
-<div id="similarities">
+<div class='matrix'>
 
-    <div style="clear: left;">
-        <div id="similarities_0_0" class="similarities-cell">-</div>
-        <div id="similarities_0_1" class="similarities-cell">0.0</div>
-        <div id="similarities_0_2" class="similarities-cell">0.0</div>
-        <div id="similarities_0_3" class="similarities-cell">0.0</div>
-    </div>
+<table id="similarities">
+    <thead>
+        <th scope="col"></th>
+        <th scope="col">Frozen</th>
+        <th scope="col">IT</th>
+        <th scope="col">Joker</th>
+        <th scope="col">Midway</th>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">Frozen</th>
+            <td id="similarities_0_0" class="similarities-cell">-</td>
+            <td id="similarities_0_1" class="similarities-cell">0</td>
+            <td id="similarities_0_2" class="similarities-cell">0</td>
+            <td id="similarities_0_3" class="similarities-cell">0</td>
+        </tr>
 
-    <div style="clear: left;">
-        <div id="similarities_1_0" class="similarities-cell">0.0</div>
-        <div id="similarities_1_1" class="similarities-cell">-</div>
-        <div id="similarities_1_2" class="similarities-cell">0.0</div>
-        <div id="similarities_1_3" class="similarities-cell">0.0</div>
-    </div>
+        <tr>
+            <th scope="row">IT</th>
+            <td id="similarities_1_0" class="similarities-cell">0</td>
+            <td id="similarities_1_1" class="similarities-cell">-</td>
+            <td id="similarities_1_2" class="similarities-cell">0</td>
+            <td id="similarities_1_3" class="similarities-cell">0</td>
+        </tr>
 
-    <div style="clear: left;">
-        <div id="similarities_2_0" class="similarities-cell">0.0</div>
-        <div id="similarities_2_1" class="similarities-cell">0.0</div>
-        <div id="similarities_2_2" class="similarities-cell">-</div>
-        <div id="similarities_2_3" class="similarities-cell">0.0</div>
-    </div>
+        <tr>
+            <th scope="row">Joker</th>
+            <td id="similarities_2_0" class="similarities-cell">0</div>
+            <td id="similarities_2_1" class="similarities-cell">0</div>
+            <td id="similarities_2_2" class="similarities-cell">-</div>
+            <td id="similarities_2_3" class="similarities-cell">0</div>
+        </tr>
 
-    <div style="clear: left;">
-        <div id="similarities_3_0" class="similarities-cell">0.0</div>
-        <div id="similarities_3_1" class="similarities-cell">0.0</div>
-        <div id="similarities_3_2" class="similarities-cell">0.0</div>
-        <div id="similarities_3_3" class="similarities-cell">-</div>
-    </div>
+        <tr>
+            <th scope="row">Midway</th>
+            <td id="similarities_3_0" class="similarities-cell">0</td>
+            <td id="similarities_3_1" class="similarities-cell">0</td>
+            <td id="similarities_3_2" class="similarities-cell">0</td>
+            <td id="similarities_3_3" class="similarities-cell">-</td>
+        </tr>
+    </tbody>
+</table>
+</div>
 </div>
 
-<br style="clear: left;"/>
+<br/>
 
 <h3>Change log</h3>
 

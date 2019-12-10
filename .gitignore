@@ -1,8 +1,6 @@
 .DS_Store
 __pycache__/
-
-#Ignore file in kafka_2.12-2.3.1 folder
-kafka_2.12-2.3.1/
-
-# Ignore kafka_2.12-2.3.1.tgz
-kafka_2.12-2.3.1.tgz
+/target
+**/*.rs.bk
+*.iml
+.idea/

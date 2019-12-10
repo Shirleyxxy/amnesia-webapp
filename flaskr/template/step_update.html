@@ -14,17 +14,26 @@
 
 
 {% block body %}
-
+<header>
+    <nav>
+        <ul>
+            <li><a href="https://ssc.io/">Home</a></li>
+            <li><a href="https://github.com/schelterlabs/projects-amnesia">Github</a></li>
+            <li id='title'>Project Amnesia Demo</li>
+            <li><a href="https://drive.google.com/file/d/1FU4svEaLb6a5v8CI4tl4YQpv4Cr4DUei/view">Slides</a></li>
+            <li><a href="https://drive.google.com/file/d/17M6k_b94stLyPB6LHOq9td2pRDAmREr8/view">Paper</a></li>
+        </ul>
+    </nav>
+</header>
 
 <div class="container">
     <div class="buttons">
         <form method="POST">
-            <input type="submit" name = "submit_button" value= "Next Step!">
-            <input type="submit" name="submit_button" value='Print Hello World'>
-            <input type="text" name="add_name">
-            <input type="text" name="add_text">
-            <input type="submit" name="submit_button" value="Add" id="add_button">
-
+            <ul>
+                <li><b style="color:beige;">New user</b>   <input type="text" name="add_name"></li>
+                <li><b style="color:beige">Watched movies</b><input type="text" name="add_text"></li>
+                <li><input type="submit" name="submit_button" value="Add" id="add_button"></li>
+            </ul>
         </form>
 
     </div>
@@ -35,8 +44,8 @@
                     <thead>
                         <tr class="history">
                             <th>Name</th>
-                            {% for movie in range(num_items) %}
-                                <th>Movie {{ movie }}</th>
+                            {% for i in range(num_items) %}
+                                <th> <img src="{{url_for('static', filename=image_list[i])}}" alt="{{image_list[i]}}" width=50>{{image_list[i][7:-4]}}</th>
                             {% endfor %}
                             <th> Action </th>
                         </tr>
@@ -100,12 +109,12 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                <table>
-                    <caption>Interaction Matrix</caption>
+                <table class="interaction">
+                    <caption>Interaction Matrix: n = colSum(history)</caption>
                     <thead>
                         <tr>
                             {% for i in range(num_items) %}
-                                <th>Movie {{i}}</th>
+                                <th> <img src="{{url_for('static', filename=image_list[i])}}" alt="{{image_list[i]}}" width=80 height=120>{{image_list[i][7:-4]}}</th>
                             {% endfor %}
                         </tr>
                     </thead>
@@ -125,13 +134,13 @@
                     </tbody>
                 </table>
         </div>
-        <table>
-            <caption>Cooccurrence Matrix</caption>
+        <table class="cooc_matrix">
+            <caption>Cooccurrence Matrix: C = H<span class='sup'>T</span>H</caption>
             <thead>
                 <tr class='cooc'>
                     <th>Movies</th>
                     {% for i in range(num_items)%}
-                    <th>Movei {{i}}</th>
+                        <th> <img src="{{url_for('static', filename=image_list[i])}}" alt="{{image_list[i]}}" width=50>{{image_list[i][7:-4]}}</th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -139,7 +148,7 @@
             <tbody>
                 {% for i in range(num_items) %}
                     <tr class='cooc'>
-                        <td><div>Movie {{i}}</div></td>
+                        <td><div> {{movie_list[i]}}</div></td>
                         {% for j in range(num_items) %}
                             <td>
                                 {% if before_cooc[i][j] != cooc[i][j] %}
@@ -156,20 +165,20 @@
             </tbody>
         
         </table>
-        <table>
-            <caption>Similarity Matrix</caption>
+        <table class="simi_matrix">
+            <caption>Similarity Matrix: S<span class= 'footnote'>ij</span> = C<span class='footnote'>ij</span>/(n<span class='footnote'>i</span> + n<span class='footnote'>j</span> -C<span class='footnote'>ij</span> ) </caption>
             <thead>
                 <tr>
                     <th>Movies</th>
                     {% for i in range(num_items) %}
-                    <th>Movie {{i}}</th>
+                        <th> <img src="{{url_for('static', filename=image_list[i])}}" alt="{{image_list[i]}}" width=50>{{image_list[i][7:-4]}}</th>
                     {% endfor %}
                 </tr>  
             </thead>
             <tbody>
                 {% for i in range(num_items) %}
                     <tr class="simi">
-                        <td><div>Movie {{i}}</div></td>
+                        <td><div>{{movie_list[i]}}</div></td>
                         {% for j in range(num_items) %}
                             <td>
                                 {% if before_simi[i][j] != simi[i][j] %}
@@ -193,29 +202,32 @@
 </footer>
 
 <script>
+    var WARN_SIGN = '{{warning}}';
     $(document).ready(function(){
+        if (WARN_SIGN == 'wrong'){
+            alert('Wrong movie names/inex input');
+        }
 
-        $('tr.history td div.before').delay(2000).fadeOut(1000, function(){
-            $('tr.history td div.after').delay(500).show().animate({opacity:'1'}, 1000);
-            $('.disappear').delay(500).fadeOut(1000);
+        $('tr.history td div.before').delay(5000).fadeOut(1000, function(){
+            $('tr.history td div.after').delay(1000).show().animate({opacity:'1'}, 1000);
+            $('.disappear').delay(1500).fadeOut(1000);
         });
 
-        $('tr.inter td div.before').delay(2000).fadeToggle(1000, function(){
+        $('tr.inter td div.before').delay(6000).fadeToggle(1000, function(){
             $('tr.inter td div.after').delay(500).show().animate({opacity:'1'}, 1000);
         });
 
-        $('tr.cooc td div.before').delay(4000).fadeToggle(1000, function(){
+        $('tr.cooc td div.before').delay(8000).fadeToggle(1000, function(){
             $('tr.cooc td div.after').delay(500).show().animate({opacity:'1'}, 1000);
 
         });      
-        $('tr.simi td div.before').delay(6000).fadeToggle(1000, function(){
+        $('tr.simi td div.before').delay(1000).fadeToggle(1000, function(){
             $('tr.simi td div.after').delay(500).show().animate({opacity:'1'}, 1000);
 
         });    
     
-    })
-
-
+    }) 
+    
 </script>
 
 {% endblock %}

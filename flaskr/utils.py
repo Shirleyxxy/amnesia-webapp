@@ -369,12 +369,24 @@ def enqueue_output(out, queue):
         queue.put(line)
     out.close()
 
-def convert_to_query_add(input_string, all_users, all_items):
+def convert_to_query_add(input_string, movie_dict, all_users, all_items):
     """
     In this version, the input_string needs to comma separated
     """
-    list_string = '['+ input_string + ']'
-    item_list = ast.literal_eval(list_string)
+    test_obj = input_string.replace(' ', '').split(',')[0]
+
+    if test_obj.isdigit(): #if it is a list of numbers
+        list_string = '['+ input_string + ']'
+        item_list = ast.literal_eval(list_string)
+    else:
+        movie_list = [x.lower() for x in input_string.replace(' ', '').split(',') if x]
+        temp_dict = {x[0].lower(): x[1] for x in movie_dict.items()}
+        item_list = []
+        for movie in movie_list:
+            if movie not in temp_dict:
+                return []
+            else:
+                item_list.append(temp_dict[movie])
     # if some are not in the list: raise a warning
     if not all([x in all_items for x in item_list]):
         return []
@@ -385,7 +397,6 @@ def convert_to_query_add(input_string, all_users, all_items):
 def convert_to_query_delete(to_be_delete_user, history_matrix, all_users):
     """
     Delete user must be within
-    TODO need to deal with situation when the user is already not there?
     """
     if to_be_delete_user not in all_users:
         return []

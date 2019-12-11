@@ -93,7 +93,6 @@ def step_update(timestamp):
     if request.method == 'POST':
         if 'delete_button' in request.form:
             name_dict = session['name_dict']
-   
             to_be_delete_user_name = request.form['delete_button'].split()[-1]
             to_be_delete_user = int(name_dict[to_be_delete_user_name])
 
@@ -161,7 +160,7 @@ def step_update(timestamp):
                                                                                                                     session['all_users'], 
                                                                                                                     session['all_items'])
             # Only when adding will update name_dict
-            session['name_dict'][new_name] = max(all_users) + 1
+            session['name_dict'][new_name] = action_list[0][0]
             # Update the session variable 
             session['before_hist'] = before_hist
             session['history'] = updated_hist

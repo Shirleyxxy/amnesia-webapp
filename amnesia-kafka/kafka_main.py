@@ -14,19 +14,18 @@ pause program for 1.2s for successful execution(included in the code)
 """
 from utils import *
 from flask import Flask, render_template, redirect, url_for, request, session
-import os
-import time
+from kafka import KafkaProducer
 from subprocess import PIPE, Popen
 from threading  import Thread
 from queue import Queue, Empty
 import json
 import shlex
 import sys
-from kafka import KafkaProducer
+import os
+import time
 import operator
 
-#Change here if necessary
-KAFKA_PATH = '/Users/Hengyu/Desktop/Git/deml-project-1/amnesia-kafka' # Change to your own path with under which /setup/kafka_2.12...exists
+KAFKA_PATH = os.getcwd() #Kafka setup files existed under current directory
 
 KAFKA_HOSTS = ['localhost:9092']
 KAFKA_VERSION = (0, 10)
@@ -36,10 +35,8 @@ IMAGE_FILENAMES = ['images/Parasite.jpg',
                    'images/Godzilla.jpg', 
                    'images/Frozen.jpg']
 
-# Set up kafka environment
-
+# Set up Kafka poducer
 producer = KafkaProducer(bootstrap_servers=KAFKA_HOSTS, api_version = KAFKA_VERSION)
-
 
 # Set up consumer thread for reading
 ON_POSIX = 'posix' in sys.builtin_module_names
@@ -54,10 +51,9 @@ t.start()
 
 ##%%
 #Initialization
-time.sleep(5)
+time.sleep(5) # Pause program for successful connection before pushing the first command
 init_list = [[0,0], [0,1], [0,2], [0,4], [1,1], [1,2], [2, 0], [2,1], [2,3], [3,1], [3,3]]
 push_command(producer, 'Add', init_list)
-
 
 app = Flask(__name__, template_folder = 'template')
 app.secret_key = b'a_project'# necessary key for session

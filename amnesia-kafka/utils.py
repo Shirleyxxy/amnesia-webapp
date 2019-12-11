@@ -128,13 +128,6 @@ def history_update(history_matrix, json_data, timestamp, all_users, all_items):
     
     return history_matrix, updated_hist, matrix_update, all_users, all_items
 
-# def item_inter_update(item_inter, json_data, timestamp=1):
-#     updated_inter = copy.deepcopy(item_inter)
-#     changes = read_add(read_action(read_time(json_data, timestamp), 'item_interactions_n'))
-#     for change in changes:
-#         updated_inter[change['item']] = change['count']
-#     return updated_inter
-
 def item_inter_update(item_inter, json_update, timestamp = 1):
     """
     Correct order of delete then add
@@ -148,13 +141,6 @@ def item_inter_update(item_inter, json_update, timestamp = 1):
             updated_item_inter[change['item']] = change['count']
     return updated_item_inter
 
-# def cooc_update(cooc, json_data, timestamp=1):
-#     updated_cooc = copy.deepcopy(cooc)
-#     changes = read_add(read_action(read_time(json_data, timestamp), 'cooccurrences_c'))
-#     for change in changes:
-#         updated_cooc[change['item_a']][change['item_b']] = change['num_cooccurrences']
-#         updated_cooc[change['item_b']][change['item_a']] = change['num_cooccurrences']
-#     return updated_cooc
 def cooc_update(cooc, json_update, timestamp = 1):
     updated_cooc = copy.deepcopy(cooc)
     changes = read_action(read_time(json_update, timestamp), 'cooccurrences_c')
@@ -179,13 +165,6 @@ def cooc_update(cooc, json_update, timestamp = 1):
                 updated_cooc[i][j] = cooc_buffer[i][j]
     return updated_cooc      
 
-# def simi_update(simi, json_data, timestamp=1):
-#     updated_simi = copy.deepcopy(simi)
-#     changes = read_add(read_action(read_time(json_data, timestamp), 'similarities_s'))
-#     for change in changes:
-#         updated_simi[change['item_a']][change['item_b']] = str(Fraction(change['similarity']).limit_denominator())
-#         updated_simi[change['item_b']][change['item_a']] = str(Fraction(change['similarity']).limit_denominator())
-#     return updated_simi
 def simi_update(simi, json_update, timestamp = 1):
     updated_simi = copy.deepcopy(simi)
     changes = read_action(read_time(json_update, timestamp), 'similarities_s')
@@ -218,14 +197,6 @@ def read_all(filename, timestamp=0):
     simi = read_similarity_matrix(json_data, timestamp)
     return json_data, history, item_inter, cooc, simi, all_users, all_items
 
-# def read_init(filename):
-#     json_data = read_json(filename)
-#     history, all_users, all_items = read_history(json_data, 0)
-#     item_inter = read_item_iteraction(json_data, 0)
-#     cooc = read_cooccurences(json_data, 0)
-#     simi = read_similarity_matrix(json_data, 0)
-#     return json_data, history, item_inter, cooc, simi, all_users, all_items 
-
 def read_init(json_data):
     history, all_users, all_items = read_history(json_data, 0)
     item_inter = read_item_iteraction(json_data, 0)
@@ -244,21 +215,6 @@ def update_all(json_data,history_matrix, item_inter, cooc, simi,  timestamp, all
     updated_simi = simi_update(simi, json_data, timestamp)
 
     return orig_hist, updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items
-
-
-# def update_all_dynamic(filename,history_matrix, item_inter, cooc, simi, all_users, all_items):
-#     """
-#     Dynamically extracts the latest update given a json file, requiring the previous matrices
-#     must be the most updated result of the previous timestamp
-#     """
-#     json_data = read_json(filename)
-#     latest_time = json_data[-1]['time']
-#     updated_hist, matrix_update, all_users, all_items = history_update(history_matrix, json_data, latest_time, all_users, all_items)
-#     updated_item = item_inter_update(item_inter, json_data, latest_time)
-#     updated_cooc = cooc_update(cooc, json_data, latest_time)
-#     updated_simi = simi_update(simi, json_data, latest_time)
-
-#     return updated_hist, matrix_update, updated_item, updated_cooc, updated_simi, all_users, all_items
 
 def update_all_latest(updated_json, history_matrix, item_inter, cooc, simi, all_users, all_items):
     """
@@ -281,7 +237,6 @@ def hist_change(json_data, timestamp=1):
     """
     Output in a dict of changed users
     Key is the user, the value is a list of tuples (item, changed_value)
-    TODO: Change now only -1, may need more general case
     """
     changes = read_delete(read_action(read_time(json_data, timestamp), 'interactions'))
     users = set([x['user'] for x in changes])

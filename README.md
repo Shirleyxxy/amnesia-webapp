@@ -23,7 +23,7 @@ This web app serves to demonstrate the decremental update procedures for an item
     - If already created, will raise error indicating topics already created, then proceed to step 5.
   - Step 5: Open another console, launch differential dataflow and direct its output to kafka: `cargo run --release | setup/kafka_2.12-2.3.0/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic changes`.
   - Step 6: Run `python kafka_main.py`. Wait until local address returns in terminal (takes around 5s).
-  - Step 7: Point the browser to `http://127.0.0.1:5000/` to launch the web app. The web app is able to talk to kafka cluster and Differential Dataflow model.
+  - Step 7: Click on popped up hyperlink `http://127.0.0.1:5000/` to launch the web app. The web app is able to talk to kafka cluster and Differential Dataflow model.
 
 - Second Implementation:
   - Step 1: Move to the right directory `cd amnesia-websocket`.

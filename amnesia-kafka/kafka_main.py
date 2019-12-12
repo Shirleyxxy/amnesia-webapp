@@ -139,10 +139,14 @@ def step_update(timestamp):
 
             if not action_list: #If the input is invalid, change nothing but raise an alert
                 session['warning'] = 'wrong'
+                curr_update = session['matrix_update']
+                curr_update = [-1 if x==0 else x for x in curr_update]
+
                 session['before_hist'] = session['history']
                 session['before_item'] = session['item_inter']
                 session['before_cooc'] = session['cooc']
                 session['before_simi'] = session['simi']
+                session['matrix_update'] = curr_update
 
                 return redirect(url_for('step_update', timestamp = timestamp))
 

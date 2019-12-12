@@ -37,6 +37,14 @@ socket.onmessage = function (event) {
   if (action['change'] == 'Remove' && change['data'] == 'item_interactions_n' && change['change'] == -1 && change['count'] == 1) {
     var item = change['item'];
     document.getElementById("interactions_per_item_" + item).innerHTML = 0;
+    for (i = 0; i < 4; i++){
+      document.getElementById("cooccurrences_" + item + "_" + i).innerHTML = 0;
+      document.getElementById("cooccurrences_" + i + "_" + item).innerHTML = 0;
+      document.getElementById("similarities_" + item + "_" + i).innerHTML = 0;
+      document.getElementById("similarities_" + i + "_" + item).innerHTML = 0;
+    }
+    document.getElementById("cooccurrences_" + item + "_" + item).innerHTML = '-';
+    document.getElementById("similarities_" + item + "_" + item).innerHTML = '-';
   }
 
 
